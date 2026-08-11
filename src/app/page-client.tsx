@@ -58,8 +58,10 @@ import {
   BarChart2,
   Shield,
   Clock,
+  Database,
   Link,
   ArrowRight,
+  ArrowLeft,
   BookOpen,
   Trash2,
   HelpCircle,
@@ -152,7 +154,17 @@ const glowVariants = {
   },
 };
 
-export default function PageClient({ initialView = "home" }: { initialView?: "home" | "article" | "connect" | "card" | "standings" }) {
+type PageVariant = "landing" | "connect" | "app";
+type ViewKey = "home" | "article" | "connect" | "card" | "standings" | "identity" | "insights" | "settings";
+type NavItem = { v: ViewKey; label: string; anchor?: string };
+
+export default function PageClient({
+  initialView = "home",
+  variant = "landing",
+}: {
+  initialView?: ViewKey;
+  variant?: PageVariant;
+}) {
   // ── State ──
   const [onboardedSources, setOnboardedSources] = useState<Set<string>>(new Set());
   const [identities, setIdentities] = useState<IdentityData[]>([]);
@@ -197,7 +209,6 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
   const [navOpen, setNavOpen] = useState(false);
 
   // ── Tab-based navigation (Patina-style bottom nav) ──
-  type ViewKey = "home" | "article" | "connect" | "card" | "standings";
   const [view, setView] = useState<ViewKey>(initialView);
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
 
@@ -205,7 +216,22 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
     setNavOpen(false);
     setView(v);
     if (typeof window !== "undefined") {
-      const route = v === "home" ? "/" : v === "connect" ? "/connect" : v === "card" ? "/app" : v === "standings" ? "/app/insights" : "/";
+    const route =
+      v === "home"
+        ? "/"
+        : v === "connect"
+        ? "/connect"
+        : v === "card"
+        ? "/app"
+        : v === "identity"
+        ? "/app/identity"
+        : v === "insights"
+        ? "/app/insights"
+        : v === "standings"
+        ? "/app/standings"
+        : v === "settings"
+        ? "/settings"
+        : "/";
       if (window.location.pathname !== route) window.history.pushState({}, "", route);
     }
     setTimeout(() => {
@@ -1198,49 +1224,103 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
               </button>
 
               {/* Center nav (desktop) */}
-              <nav className="hidden md:flex items-center gap-1">
-                {[
-                  { v: "connect", label: "Connect" },
-                  { v: "home", label: "How it works", anchor: "how" },
-                  { v: "article", label: "Article" },
-                  { v: "standings", label: "Standings" },
-                  { v: "card", label: "Your Mirror" },
-                ].map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => goView(item.v as ViewKey, item.anchor)}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
-                      view === item.v
-                        ? "text-[#38BDF8] bg-[#38BDF8]/10"
-                        : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
+              {variant === "landing" && (
+                <nav className="hidden md:flex items-center gap-1">
+                  {([
+                    { v: "home", label: "How it works", anchor: "how" },
+                    { v: "home", label: "Privacy", anchor: "privacy" },
+                    { v: "home", label: "FAQ", anchor: "faq" },
+                  ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
+                    <button
+                      key={item.label}
+                      onClick={() => goView(item.v as ViewKey, item.anchor)}
+                      className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
+                        view === item.v
+                          ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                          : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+              )}
+              {variant === "connect" && (
+                <nav className="hidden md:flex items-center gap-1">
+                  <span className="px-3.5 py-2 rounded-lg text-sm font-medium text-[#38BDF8] bg-[#38BDF8]/10 inline-flex items-center min-h-[44px]">
+                    Connect
+                  </span>
+                </nav>
+              )}
+              {variant === "app" && (
+                <nav className="hidden md:flex items-center gap-1">
+                  {([
+                    { v: "card", label: "Overview" },
+                    { v: "identity", label: "Identity" },
+                    { v: "insights", label: "Insights" },
+                  ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
+                    <button
+                      key={item.label}
+                      onClick={() => goView(item.v as ViewKey, item.anchor)}
+                      className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
+                        view === item.v
+                          ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                          : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+              )}
 
               {/* Right actions */}
               <div className="flex items-center gap-3">
-                <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.07]">
-                  <span className="text-emerald-400 font-mono text-sm font-semibold">{connectedCount}</span>
-                  <span className="text-white/20">/</span>
-                  <span className="text-white/50 font-mono text-sm">{totalSources}</span>
-                  <span className="text-[9px] uppercase tracking-wider text-white/35 ml-0.5">connected</span>
-                </div>
-                <motion.button
-                  whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
-                  whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                  onClick={() => goView("connect")}
-                  className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
-                  style={{
-                    background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)",
-                    boxShadow: "0 2px 12px -4px rgba(59,130,246,0.5)",
-                  }}
-                >
-                  Connect
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
+                {variant === "landing" && (
+                  <>
+                    <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.07]">
+                      <span className="text-emerald-400 font-mono text-sm font-semibold">{connectedCount}</span>
+                      <span className="text-white/20">/</span>
+                      <span className="text-white/50 font-mono text-sm">{totalSources}</span>
+                      <span className="text-[9px] uppercase tracking-wider text-white/35 ml-0.5">connected</span>
+                    </div>
+                    <motion.button
+                      whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                      whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                      onClick={() => goView("connect")}
+                      className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
+                      style={{
+                        background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)",
+                        boxShadow: "0 2px 12px -4px rgba(59,130,246,0.5)",
+                      }}
+                    >
+                      Connect
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.button>
+                  </>
+                )}
+                {variant === "connect" && (
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => goView("home")}
+                    className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#94A3B8] hover:text-white bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back
+                  </motion.button>
+                )}
+                {variant === "app" && (
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => goView("settings")}
+                    className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#94A3B8] hover:text-white bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </motion.button>
+                )}
                 {/* Mobile hamburger */}
                 <button
                   onClick={() => setNavOpen((v) => !v)}
@@ -1263,32 +1343,70 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
                   className="md:hidden overflow-hidden"
                 >
                   <div className="py-3 space-y-1 border-t border-[#94A3B8]/10 bg-[#0B1222]/95">
-                    {[
-                      { v: "connect", label: "Connect" },
-                      { v: "home", label: "How it works", anchor: "how" },
-                      { v: "article", label: "Article" },
-                      { v: "standings", label: "Standings" },
-                      { v: "card", label: "Your Mirror" },
-                    ].map((item) => (
+                    {variant === "landing" &&
+                      ([
+                        { v: "home", label: "How it works", anchor: "how" },
+                        { v: "home", label: "Privacy", anchor: "privacy" },
+                        { v: "home", label: "FAQ", anchor: "faq" },
+                      ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
+                        <button
+                          key={item.label}
+                          onClick={() => goView(item.v as ViewKey, item.anchor)}
+                          className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                            view === item.v
+                              ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                              : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    {variant === "app" &&
+                      ([
+                        { v: "card", label: "Overview" },
+                        { v: "identity", label: "Identity" },
+                        { v: "insights", label: "Insights" },
+                        { v: "connect", label: "Add source" },
+                      ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
+                        <button
+                          key={item.label}
+                          onClick={() => goView(item.v as ViewKey, item.anchor)}
+                          className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                            view === item.v
+                              ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                              : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    {variant === "connect" && (
                       <button
-                        key={item.label}
-                        onClick={() => goView(item.v as ViewKey, item.anchor)}
-                        className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                          view === item.v
-                            ? "text-[#38BDF8] bg-[#38BDF8]/10"
-                            : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
-                        }`}
+                        onClick={() => goView("home")}
+                        className="w-full text-left px-3 py-3 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04] transition-colors"
                       >
-                        {item.label}
+                        ← Back to home
                       </button>
-                    ))}
-                    <button
-                      onClick={() => goView("connect")}
-                      className="w-full mt-2 px-3 py-3 rounded-lg text-sm font-semibold text-white"
-                      style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
-                    >
-                      Connect
-                    </button>
+                    )}
+                    {variant === "landing" && (
+                      <button
+                        onClick={() => goView("connect")}
+                        className="w-full mt-2 px-3 py-3 rounded-lg text-sm font-semibold text-white"
+                        style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                      >
+                        Connect
+                      </button>
+                    )}
+                    {variant === "app" && (
+                      <button
+                        onClick={() => {
+                          if (typeof window !== "undefined") window.location.href = "/settings";
+                        }}
+                        className="w-full mt-2 px-3 py-3 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-white hover:bg-white/[0.04] transition-colors"
+                      >
+                        Settings
+                      </button>
+                    )}
                   </div>
                 </motion.nav>
               )}
@@ -1872,8 +1990,8 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
                   1
                 </div>
                 <div>
-                  <h2 className="font-display text-lg font-semibold tracking-tight leading-tight">Connect data sources</h2>
-                  <p className="tracking-ui text-xs text-white/40 mt-0.5">Pick any accounts — your mirror gets deeper with each one</p>
+                  <h2 className="font-display text-lg font-semibold tracking-tight leading-tight">Connect your accounts</h2>
+                  <p className="tracking-ui text-xs text-white/40 mt-0.5">Start with one. Add more whenever you want.</p>
                 </div>
                 <motion.div
                   animate={{ scale: [1, 1.02, 1] }}
@@ -1893,6 +2011,46 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
                 animate="animate"
                 className="space-y-8"
               >
+                {/* Connected Sources (PRD #10) */}
+                {identities.length > 0 && (
+                  <motion.section
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className="flex items-center gap-2.5 mb-4">
+                      <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.1 }}
+                        className="w-2.5 h-2.5 rounded-full bg-emerald-400"
+                      />
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-white/45">Connected sources</span>
+                      <span className="ml-auto text-[11px] text-white/25">{identities.length} connected</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {identities.map((id) => {
+                        const src = DATA_SOURCES.find((s) => s.id === id.source);
+                        return (
+                          <motion.span
+                            key={id.source}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20 text-sm text-emerald-300"
+                          >
+                            {src && <BrandIcon id={src.icon} size={14} />}
+                            {id.source}
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                          </motion.span>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 flex items-center gap-2 text-xs text-white/35">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-400/70" />
+                      Accepted — each source contributes to your Nodea Score.
+                    </div>
+                  </motion.section>
+                )}
+
                 {/* Web Sources */}
                 <motion.section
                   initial={{ opacity: 0, y: 20 }}
@@ -2432,6 +2590,82 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
 
           {view === "card" && (
             <>
+              {/* Dashboard heading (PRD #14-16) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-8"
+              >
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.07] bg-white/[0.02] text-[11px] uppercase tracking-widest text-white/40 mb-4">
+                  <AppLogo size={14} /> Your Nodea
+                </div>
+                <h1 className="font-display-hero text-3xl md:text-5xl font-semibold tracking-tighter text-white">
+                  What did Nodea <span className="gradient-brand">discover</span> about you?
+                </h1>
+                <p className="mt-4 text-white/45 text-sm md:text-base max-w-xl mx-auto">
+                  Your Score, identity and insights — built from real connected activity, not questionnaires.
+                </p>
+              </motion.div>
+
+              {/* Empty-state banner (PRD #35) */}
+              {identities.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.5 }}
+                  className="mb-6 p-6 rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01] text-center"
+                >
+                  <div className="text-white/80 font-display text-lg font-semibold">Your Nodea starts with one source.</div>
+                  <p className="mt-2 text-white/40 text-sm">Connect an account to discover your digital identity.</p>
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => goView("connect")}
+                    className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
+                    style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)", boxShadow: "0 2px 12px -4px rgba(59,130,246,0.5)" }}
+                  >
+                    <Plus className="w-4 h-4" /> Connect an account
+                  </motion.button>
+                </motion.div>
+              ) : identities.length === 1 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.5 }}
+                  className="mb-6 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] flex flex-wrap items-center justify-between gap-3"
+                >
+                  <div className="text-white/70 font-medium text-sm">Your Nodea is taking shape.</div>
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => goView("connect")}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-shadow duration-300"
+                    style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add another source
+                  </motion.button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.5 }}
+                  className="mb-6 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] flex flex-wrap items-center justify-between gap-3"
+                >
+                  <div className="text-white/70 font-medium text-sm">Your Nodea is becoming richer.</div>
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => goView("connect")}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-shadow duration-300"
+                    style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add another source
+                  </motion.button>
+                </motion.div>
+              )}
+
               {/* Instruction Copy (Patina-style) */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -2542,8 +2776,8 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
                   2
                 </div>
                 <div>
-                  <h2 className="font-display text-lg font-semibold tracking-tight leading-tight">Your Mirror</h2>
-                  <p className="tracking-ui text-xs text-white/40 mt-0.5">Insights from your connected data</p>
+                  <h2 className="font-display text-lg font-semibold tracking-tight leading-tight">Your Nodea</h2>
+                  <p className="tracking-ui text-xs text-white/40 mt-0.5">Your Score, identity and insights</p>
                 </div>
               </div>
 
@@ -2795,6 +3029,374 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
                 )}
               </AnimatePresence>
             </motion.div>
+          </>
+        )}
+
+        {view === "identity" && (
+          <>
+            {/* Identity page (PRD #17) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-8"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.07] bg-white/[0.02] text-[11px] uppercase tracking-widest text-white/40 mb-4">
+                <Users className="w-3.5 h-3.5" /> Identity
+              </div>
+              <h1 className="font-display-hero text-3xl md:text-5xl font-semibold tracking-tighter text-white">
+                Who does Nodea think <span className="gradient-brand">you are?</span>
+              </h1>
+              <p className="mt-4 text-white/45 text-sm md:text-base max-w-xl mx-auto">
+                Your identity interpretation is built from patterns in your real activity — what you create, consume and connect.
+              </p>
+            </motion.div>
+
+            {identities.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01] text-center"
+              >
+                <div className="text-white/80 font-display text-lg font-semibold">Your Nodea starts with one source.</div>
+                <p className="mt-2 text-white/40 text-sm">Connect an account to discover your digital identity.</p>
+                <motion.button
+                  whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                  onClick={() => goView("connect")}
+                  className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
+                  style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                >
+                  <Plus className="w-4 h-4" /> Connect an account
+                </motion.button>
+              </motion.div>
+            ) : !identityResult ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01] text-center"
+              >
+                <div className="text-white/80 font-display text-lg font-semibold">Generate your identity</div>
+                <p className="mt-2 text-white/40 text-sm">Connect and generate to see who your activity says you are.</p>
+                <motion.button
+                  whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                  onClick={handleGenerate}
+                  disabled={generating}
+                  className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-shadow duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                >
+                  {generating ? "Generating…" : "Generate Identity"}
+                </motion.button>
+              </motion.div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-5"
+                >
+                  <DataSoulCard data={identityResult as Record<string, unknown>} />
+                  {/* Multi-source personality (PRD #20) */}
+                  {identities.length > 1 && (
+                    <div className="p-5 rounded-2xl glass glass-border">
+                      <h3 className="text-sm font-semibold mb-4 text-white/70 flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-blue-400" />
+                        Every source reveals another side
+                      </h3>
+                      <div className="space-y-2.5">
+                        {identities.map((id) => {
+                          const src = DATA_SOURCES.find((s) => s.id === id.source);
+                          return (
+                            <div key={id.source} className="flex items-center gap-3">
+                              {src && <BrandIcon id={src.icon} size={20} />}
+                              <div className="min-w-0">
+                                <div className="text-sm text-white/70 font-medium">{id.source}</div>
+                                <div className="text-[11px] text-white/35 truncate">
+                                  {src?.description || "A different side of you"}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-5"
+                >
+                  {soulScore && (
+                    <div className="p-5 rounded-2xl glass glass-border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="p-2 rounded-xl bg-blue-500/15">
+                          <BarChart2 className="w-5 h-5 text-blue-300" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-white">Supporting signals</div>
+                          <div className="tracking-ui text-[10px] text-white/35">How your identity is grounded</div>
+                        </div>
+                      </div>
+                      <ScoreBreakdown components={soulScore.components} />
+                    </div>
+                  )}
+                  {getTraits(identities.map((i) => i.source)).length > 0 && (
+                    <div className="p-5 rounded-2xl glass glass-border">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-3 flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4" /> Traits
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {getTraits(identities.map((i) => i.source)).map((t: Trait) => (
+                          <span
+                            key={t.id}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border ${
+                              t.rarity === "epic"
+                                ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                                : t.rarity === "rare"
+                                ? "bg-blue-500/10 border-blue-500/30 text-blue-300"
+                                : "bg-white/[0.03] border-white/10 text-white/50"
+                            }`}
+                            title={t.desc}
+                          >
+                            <span>{t.emoji}</span>
+                            {t.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <motion.div
+                    whileHover={reducedMotion ? {} : { scale: 1.02, y: -2 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.98 }}
+                    onClick={() => goView("connect")}
+                    className="p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] cursor-pointer hover:border-white/15 transition-colors"
+                  >
+                    <div className="text-sm font-semibold text-white/80">Want a deeper picture?</div>
+                    <div className="mt-1 text-xs text-white/40">Connect another source to reveal another side of you. <span className="text-blue-400 font-medium">+ Add source →</span></div>
+                  </motion.div>
+                </motion.div>
+              </div>
+            )}
+          </>
+        )}
+
+        {view === "insights" && (
+          <>
+            {/* Insights page (PRD #18) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-8"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.07] bg-white/[0.02] text-[11px] uppercase tracking-widest text-white/40 mb-4">
+                <Sparkles className="w-3.5 h-3.5" /> Insights
+              </div>
+              <h1 className="font-display-hero text-3xl md:text-5xl font-semibold tracking-tighter text-white">
+                Discoveries from <span className="gradient-brand">your activity</span>
+              </h1>
+              <p className="mt-4 text-white/45 text-sm md:text-base max-w-xl mx-auto">
+                Structured observations about your digital identity — patterns, strengths and unique combinations.
+              </p>
+            </motion.div>
+
+            {identities.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01] text-center"
+              >
+                <div className="text-white/80 font-display text-lg font-semibold">Your Nodea starts with one source.</div>
+                <p className="mt-2 text-white/40 text-sm">Connect an account to discover your digital identity.</p>
+                <motion.button
+                  whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                  onClick={() => goView("connect")}
+                  className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
+                  style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                >
+                  <Plus className="w-4 h-4" /> Connect an account
+                </motion.button>
+              </motion.div>
+            ) : (
+              <div className="max-w-3xl mx-auto space-y-5">
+                <InsightsPanel
+                  identities={identities.map((i) => ({ source: i.source, data: i.data }))}
+                  mode="auto"
+                />
+                {identityResult && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <motion.button
+                      whileHover={reducedMotion ? {} : { scale: 1.02, y: -2 }}
+                      whileTap={reducedMotion ? {} : { scale: 0.98 }}
+                      onClick={shareCard}
+                      className="flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold text-white transition-all duration-300"
+                      style={{ background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)" }}
+                    >
+                      <Share2 className="w-4.5 h-4.5" /> Share
+                    </motion.button>
+                    <motion.button
+                      whileHover={reducedMotion ? {} : { scale: 1.02, y: -2 }}
+                      whileTap={reducedMotion ? {} : { scale: 0.98 }}
+                      onClick={copyCardLink}
+                      className="flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold bg-white/[0.05] hover:bg-white/[0.1] border border-white/10"
+                    >
+                      <Copy className="w-4.5 h-4.5" /> Copy Link
+                    </motion.button>
+                  </div>
+                )}
+                <motion.div
+                  whileHover={reducedMotion ? {} : { scale: 1.02, y: -2 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.98 }}
+                  onClick={() => goView("connect")}
+                  className="p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] cursor-pointer hover:border-white/15 transition-colors"
+                >
+                  <div className="text-sm font-semibold text-white/80">Want a deeper picture?</div>
+                  <div className="mt-1 text-xs text-white/40">Connect another source for richer cross-source insights. <span className="text-blue-400 font-medium">+ Add source →</span></div>
+                </motion.div>
+              </div>
+            )}
+          </>
+        )}
+
+        {view === "settings" && (
+          <>
+            {/* Settings page */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-8"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.07] bg-white/[0.02] text-[11px] uppercase tracking-widest text-white/40 mb-4">
+                <Settings className="w-3.5 h-3.5" /> Settings
+              </div>
+              <h1 className="font-display-hero text-3xl md:text-5xl font-semibold tracking-tighter text-white">
+                Your Nodea <span className="gradient-brand">settings</span>
+              </h1>
+              <p className="mt-4 text-white/45 text-sm md:text-base max-w-xl mx-auto">
+                Locally stored in your browser. Nothing leaves your machine unless you choose.
+              </p>
+            </motion.div>
+
+            <div className="max-w-3xl mx-auto space-y-4">
+              {/* Connected accounts — per-source disconnect */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+                className="p-6 rounded-2xl glass glass-border"
+              >
+                <h3 className="text-sm font-semibold text-white/70 flex items-center gap-2 mb-4">
+                  <Layers className="w-4 h-4 text-blue-400" />
+                  Connected accounts
+                </h3>
+                {identities.length === 0 ? (
+                  <p className="text-sm text-white/40">You have no connected sources yet.</p>
+                ) : (
+                  <div className="space-y-2.5">
+                    {identities.map((id) => {
+                      const src = DATA_SOURCES.find((s) => s.id === id.source);
+                      return (
+                        <div
+                          key={id.source}
+                          className="flex items-center gap-3 justify-between py-2.5 border-b border-white/[0.05] last:border-0"
+                        >
+                          <div className="flex items-center gap-3">
+                            {src && <BrandIcon id={src.icon} size={20} />}
+                            <div>
+                              <div className="text-sm font-medium text-white/80">{src?.name || id.source}</div>
+                              <div className="text-[11px] text-white/35">{src?.description}</div>
+                            </div>
+                          </div>
+                          <motion.button
+                            whileHover={reducedMotion ? {} : { scale: 1.03 }}
+                            whileTap={reducedMotion ? {} : { scale: 0.95 }}
+                            onClick={() => disconnectSource(id.source)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-300 hover:text-red-200 hover:bg-red-500/10 border border-red-500/20 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Disconnect
+                          </motion.button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <motion.button
+                  whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.98 }}
+                  onClick={() => goView("connect")}
+                  className="mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
+                  style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                >
+                  <Plus className="w-4 h-4" /> Add another source
+                </motion.button>
+              </motion.div>
+
+              {/* Local data */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.5 }}
+                className="p-6 rounded-2xl glass glass-border"
+              >
+                <h3 className="text-sm font-semibold text-white/70 flex items-center gap-2 mb-4">
+                  <Database className="w-4 h-4 text-blue-400" /> Data stored locally
+                </h3>
+                <div className="text-xs text-white/35 space-y-1 font-mono">
+                  <div>nodea:identities — your connected sources &amp; parsed data</div>
+                  <div>nodea:onboarded — which sources are marked connected</div>
+                  <div>nodea:connect-pending — in-flight connection state</div>
+                </div>
+              </motion.div>
+
+              {/* Reset */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="p-6 rounded-2xl border border-red-500/20 bg-red-500/[0.03]"
+              >
+                <h3 className="text-sm font-semibold text-red-300/80 flex items-center gap-2 mb-2">
+                  <Trash2 className="w-4 h-4" /> Forget my mirror
+                </h3>
+                <p className="text-xs text-white/40 mb-4">
+                  Wipe locally stored identity, score and connection state. This cannot be undone.
+                </p>
+                <div className="flex gap-2">
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.02 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        window.localStorage.removeItem("nodea:identities");
+                        window.localStorage.removeItem("nodea:onboarded");
+                        window.localStorage.removeItem("nodea:connect-pending");
+                      }
+                      setIdentities([]);
+                      setOnboardedSources(new Set());
+                      setIdentityResult(null);
+                      setRefFrom(null);
+                      goView("home");
+                    }}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 transition-colors"
+                  >
+                    Reset my data
+                  </motion.button>
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.02 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => goView("card")}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white/70 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 transition-colors"
+                  >
+                    Cancel
+                  </motion.button>
+                </div>
+              </motion.div>
+            </div>
           </>
         )}
         </main>
@@ -3244,14 +3846,25 @@ export default function PageClient({ initialView = "home" }: { initialView?: "ho
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           aria-label="Primary"
         >
-          <div className="mx-auto max-w-lg grid grid-cols-5">
-            {[
-              { v: "home", label: "Home", icon: Home },
-              { v: "article", label: "Article", icon: Newspaper },
-              { v: "connect", label: "Connect", icon: Plus },
-              { v: "card", label: "Mirror", icon: CreditCard },
-              { v: "standings", label: "Standings", icon: Trophy },
-            ].map((t) => {
+          <div className={`mx-auto max-w-lg grid ${variant === "app" ? "grid-cols-4" : variant === "connect" ? "grid-cols-2" : "grid-cols-3"}`}>
+            {(variant === "landing"
+              ? [
+                  { v: "home", label: "Home", icon: Home },
+                  { v: "connect", label: "Connect", icon: Plus },
+                  { v: "standings", label: "Standings", icon: Trophy },
+                ]
+              : variant === "connect"
+              ? [
+                  { v: "home", label: "Home", icon: Home },
+                  { v: "connect", label: "Connect", icon: Plus },
+                ]
+              : [
+                  { v: "card", label: "Overview", icon: CreditCard },
+                  { v: "identity", label: "Identity", icon: Users },
+                  { v: "insights", label: "Insights", icon: Sparkles },
+                  { v: "connect", label: "Add source", icon: Plus },
+                ]
+            ).map((t) => {
               const active = view === t.v;
               return (
                 <button
