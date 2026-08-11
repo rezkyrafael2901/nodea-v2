@@ -408,7 +408,7 @@ export default function PageClient({
         const seconds = attempt * 1.5;
         if (seconds < 3) return "Opening the Vana approval tab…";
         if (seconds < 8) return "Waiting for you to approve in the Vana tab…";
-        if (seconds < 18) return "Reading your history…";
+        if (seconds < 18) return "We're finding patterns in your activity…";
         if (seconds < 35) return "This is the slow part. Your history is being collected for the first time…";
         return `Still going. First reads usually take up to ${Math.ceil((maxAttempts - attempt) * 1.5 / 60)} min…`;
       };
@@ -2181,8 +2181,8 @@ export default function PageClient({
                     {
                       num: "03",
                       icon: ArrowRight,
-                      title: "Save it, and it travels",
-                      desc: "Persist your Nodea card to mainnet. Other apps can verify your identity and score without repeating setup.",
+                      title: "Save it on chain (optional)",
+                      desc: "Opt-in only — anchor your Nodea to mainnet so other apps can verify your identity and score without repeating setup. Keeps working fully off-chain until you choose this.",
                     },
                   ].map((step, i) => (
                     <motion.div
@@ -3102,7 +3102,8 @@ export default function PageClient({
                     <div className="p-5 rounded-2xl glass glass-border">
                       <h3 className="text-sm font-semibold mb-4 text-white/70 flex items-center gap-2">
                         <Layers className="w-4 h-4 text-blue-400" />
-                        Every source reveals another side
+                        Every source reveals another side.
+                        <span className="block text-xs font-normal text-white/40 mt-1">Discover another side of yourself — add one more source.</span>
                       </h3>
                       <div className="space-y-2.5">
                         {identities.map((id) => {
@@ -3631,13 +3632,10 @@ export default function PageClient({
                 <AppLogo size={56} />
               </motion.div>
               <h2 className="font-display-hero text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tighter text-white leading-tight">
-                Your data has a story.
-                <br />
-                <span className="gradient-brand">See what it says.</span>
+                Discover your Nodea.
               </h2>
               <p className="mt-5 text-white/50 text-base md:text-lg max-w-xl mx-auto">
-                Connect one account and discover what your data says about you — it takes less than a minute.
-              </p>
+                Connect one account and discover what your data says about you — it takes less than a minute.</p>
               <motion.button
                 whileHover={reducedMotion ? {} : { scale: 1.04, y: -2 }}
                 whileTap={reducedMotion ? {} : { scale: 0.97 }}
