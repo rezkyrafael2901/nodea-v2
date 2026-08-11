@@ -1,3 +1,5 @@
-"use client";
-import { AppLogo } from "@/components/app-logo";
-export default function SettingsPage() { return <main className="min-h-screen bg-[#0B1222] px-4 py-24 text-[#E2E8F0]"><div className="mx-auto max-w-3xl"><a href="/" className="mb-12 inline-flex items-center gap-3"><AppLogo size={34}/><span className="font-semibold">NODEA</span></a><h1 className="text-4xl font-semibold">Settings & Privacy</h1><p className="mt-4 text-[#94A3B8]">Manage your connections, privacy, and optional persistence.</p><section className="mt-10 grid gap-4"><div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6"><h2 className="text-lg font-medium">Privacy</h2><p className="mt-2 text-sm text-[#94A3B8]">Only data you approve is read. No password is needed. Disconnect anytime.</p></div><div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6"><h2 className="text-lg font-medium">Connected accounts</h2><p className="mt-2 text-sm text-[#94A3B8]">Manage connected sources from the Connect page.</p><a href="/connect" className="mt-4 inline-flex rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] px-4 py-2 text-sm font-semibold">Manage connections</a></div><div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6"><h2 className="text-lg font-medium">Optional persistence</h2><p className="mt-2 text-sm text-[#94A3B8]">Vana persistence is optional and does not block the basic Nodea experience.</p></div></section></div></main>; }
+import PageClient from "../page-client";
+
+export default function SettingsPage() {
+  return <PageClient initialView="settings" />;
+}
