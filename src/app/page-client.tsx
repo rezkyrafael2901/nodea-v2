@@ -14,6 +14,7 @@ import { getTraits, getTopTrait, type Trait } from "@/lib/traits";
 import { type LeaderboardEntry } from "@/lib/rewards";
 import { DataSoulCard } from "@/components/data-soul-card";
 import InsightsPanel from "@/components/insights-panel";
+import IdentityResult from "@/components/identity-result";
 import { BrandIconTile, BrandIcon, type BrandId } from "@/components/brand-icons";
 import { AppLogo, AppWordmark } from "@/components/app-logo";
 import { SourceOrbit } from "@/components/source-orbit";
@@ -3087,96 +3088,28 @@ export default function PageClient({
                 </motion.button>
               </motion.div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-5"
-                >
-                  <DataSoulCard data={identityResult as Record<string, unknown>} />
-                  {/* Multi-source personality (PRD #20) */}
-                  {identities.length > 1 && (
-                    <div className="p-5 rounded-2xl glass glass-border">
-                      <h3 className="text-sm font-semibold mb-4 text-white/70 flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-blue-400" />
-                        Every source reveals another side.
-                        <span className="block text-xs font-normal text-white/40 mt-1">Discover another side of yourself — add one more source.</span>
-                      </h3>
-                      <div className="space-y-2.5">
-                        {identities.map((id) => {
-                          const src = DATA_SOURCES.find((s) => s.id === id.source);
-                          return (
-                            <div key={id.source} className="flex items-center gap-3">
-                              {src && <BrandIcon id={src.icon} size={20} />}
-                              <div className="min-w-0">
-                                <div className="text-sm text-white/70 font-medium">{id.source}</div>
-                                <div className="text-[11px] text-white/35 truncate">
-                                  {src?.description || "A different side of you"}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: easeOut }}
+              >
+                {/* ── Clean, editorial result (Pathfit-style) ── */}
+                <IdentityResult
+                  identities={identities.map((i) => ({ source: i.source, data: i.data }))}
+                  mode="auto"
+                />
 
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-5"
-                >
-                  {soulScore && (
-                    <div className="p-5 rounded-2xl glass glass-border">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="p-2 rounded-xl bg-blue-500/15">
-                          <BarChart2 className="w-5 h-5 text-blue-300" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-white">Supporting signals</div>
-                          <div className="tracking-ui text-[10px] text-white/35">How your identity is grounded</div>
-                        </div>
-                      </div>
-                      <ScoreBreakdown components={soulScore.components} />
-                    </div>
-                  )}
-                  {getTraits(identities.map((i) => i.source)).length > 0 && (
-                    <div className="p-5 rounded-2xl glass glass-border">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-3 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4" /> Traits
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {getTraits(identities.map((i) => i.source)).map((t: Trait) => (
-                          <span
-                            key={t.id}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border ${
-                              t.rarity === "epic"
-                                ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
-                                : t.rarity === "rare"
-                                ? "bg-blue-500/10 border-blue-500/30 text-blue-300"
-                                : "bg-white/[0.03] border-white/10 text-white/50"
-                            }`}
-                            title={t.desc}
-                          >
-                            <span>{t.emoji}</span>
-                            {t.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <motion.div
-                    whileHover={reducedMotion ? {} : { scale: 1.02, y: -2 }}
-                    whileTap={reducedMotion ? {} : { scale: 0.98 }}
+                {/* Quiet upsell — one line, no card clutter */}
+                <div className="max-w-2xl mx-auto mt-6 text-center">
+                  <button
                     onClick={() => goView("connect")}
-                    className="p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] cursor-pointer hover:border-white/15 transition-colors"
+                    className="text-[13px] text-white/40 hover:text-white/70 transition-colors"
                   >
-                    <div className="text-sm font-semibold text-white/80">Want a deeper picture?</div>
-                    <div className="mt-1 text-xs text-white/40">Connect another source to reveal another side of you. <span className="text-blue-400 font-medium">+ Add source →</span></div>
-                  </motion.div>
-                </motion.div>
-              </div>
+                    Connect another source to reveal another side of you{" "}
+                    <span className="text-blue-400/80">→</span>
+                  </button>
+                </div>
+              </motion.div>
             )}
           </>
         )}

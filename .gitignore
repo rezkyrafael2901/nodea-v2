@@ -61,3 +61,4 @@ scripts/deploy.py
 scripts/list_domains.py
 scripts/redirect_domain*
 scripts/update_vercel_vana_key.py
+.env*
