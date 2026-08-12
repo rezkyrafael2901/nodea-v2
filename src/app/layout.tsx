@@ -20,7 +20,7 @@ const ebGaramond = EB_Garamond({
   style: ["normal", "italic"],
 });
 
-const rawAppUrl = process.env.APP_URL || process.env.VERCEL_URL || "https://nodeahub.vercel.app";
+const rawAppUrl = process.env.APP_URL || process.env.VERCEL_URL || "https://nodea-v2.vercel.app";
 const appUrl = rawAppUrl.startsWith("http://") || rawAppUrl.startsWith("https://") ? rawAppUrl : `https://${rawAppUrl}`;
 
 export const metadata: Metadata = {

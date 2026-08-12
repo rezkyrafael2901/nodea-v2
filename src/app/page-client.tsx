@@ -2180,9 +2180,9 @@ export default function PageClient({
                     },
                     {
                       num: "03",
-                      icon: ArrowRight,
-                      title: "Save it on chain (optional)",
-                      desc: "Opt-in only — anchor your Nodea to mainnet so other apps can verify your identity and score without repeating setup. Keeps working fully off-chain until you choose this.",
+                      icon: Share2,
+                      title: "Share & compare",
+                      desc: "Your Nodea Card is a shareable link — compare scores, spark conversations, and see how your digital self stacks up. No wallet, no friction.",
                     },
                   ].map((step, i) => (
                     <motion.div
@@ -2395,7 +2395,7 @@ export default function PageClient({
                   {[
                     {
                       q: "Do I need a wallet?",
-                      a: "No. Connect with a normal OAuth login. Your Nodea Score stays in your browser until you choose to sign it on-chain.",
+                      a: "No. Connect with a normal OAuth login. Your Nodea Score stays in your browser — fully private, fully yours.",
                     },
                     {
                       q: "Is this anonymous?",
@@ -2403,7 +2403,7 @@ export default function PageClient({
                     },
                     {
                       q: "Can I delete my data?",
-                      a: "Yes. Disconnect any source, or clear browser storage with 'Forget my mirror'. If you signed on-chain, you keep the keys and can ignore us forever.",
+                      a: "Yes. Disconnect any source, or clear browser storage with 'Forget my mirror' — your data, your control.",
                     },
                     {
                       q: "Why does some data require Vana Desktop?",
@@ -2421,10 +2421,7 @@ export default function PageClient({
                       q: "Is this a personality test?",
                       a: "Not a questionnaire-based one. Nodea scores who you already are, from what you've already done — not how you describe yourself.",
                     },
-                    {
-                      q: "What does the on-chain registration do?",
-                      a: "It anchors your Score + identity card to your wallet so other apps can verify them without you reconnecting your accounts. Opt-in, revocable, not required to use Nodea.",
-                    },
+
                     {
                       q: "Is my score 'real' / comparable?",
                       a: "Your raw score is personal. The grade (S–D) and relative rank on the Vana Cup leaderboard are what we compare across users.",
