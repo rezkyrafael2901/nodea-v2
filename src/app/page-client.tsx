@@ -17,7 +17,6 @@ import InsightsPanel from "@/components/insights-panel";
 import IdentityResult from "@/components/identity-result";
 import { BrandIconTile, BrandIcon, type BrandId } from "@/components/brand-icons";
 import { AppLogo, AppWordmark } from "@/components/app-logo";
-import { SourceOrbit } from "@/components/source-orbit";
 import {
   Plus,
   Check,
@@ -1419,122 +1418,168 @@ export default function PageClient({
         <main className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${view === "article" ? "py-0" : "py-12 md:py-20 lg:py-28"}`}>
           {view === "home" && (
             <>
-          {/* ── Hero (Framer-style) ── */}
+          {/* ── Hero (card-as-hero · konsep C) ── */}
           <motion.section
             id="hero"
             variants={sectionVariants}
             initial="initial"
             animate="animate"
-            className="relative text-center mb-20 md:mb-28 pt-16 md:pt-24"
+            className="relative mb-20 md:mb-28 pt-16 md:pt-24"
           >
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.7, ease: easeOut }}
-              className="font-display-hero text-5xl md:text-7xl lg:text-[5.2rem] font-semibold tracking-tighter leading-[1.02] mb-6"
-            >
-              <span className="gradient-white">You're more interesting</span>
-              <br />
-              <span className="gradient-brand">than your bio.</span>
-            </motion.h1>
+            <div className="grid lg:grid-cols-2 gap-14 md:gap-16 items-center max-w-6xl mx-auto text-left">
+              {/* Left: copy + CTA */}
+              <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.6, ease: easeOut }}
+                  className="font-mono text-xs md:text-sm uppercase tracking-[0.18em] text-cyan-300/90 mb-5"
+                >
+                  Your data. Your mirror.
+                </motion.div>
+                <motion.h1
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.7, ease: easeOut }}
+                  className="font-display-hero text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter leading-[1.04] mb-6"
+                >
+                  Meet <span className="gradient-brand">yourself</span>
+                  <br />
+                  in your data.
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.7, ease: easeOut }}
+                  className="tracking-ui text-lg md:text-xl text-white/50 max-w-lg leading-relaxed text-balance"
+                >
+                  Connect the accounts you already own. Nodea reads your real
+                  activity — then shows you the{" "}
+                  <span className="text-white/85">person behind it</span>. Not a quiz,
+                  a mirror.
+                </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.7, ease: easeOut }}
-              className="tracking-ui text-lg md:text-xl lg:text-2xl text-white/50 max-w-3xl mx-auto leading-relaxed text-balance"
-            >
-              Nodea connects the accounts you already own and reads your real
-              activity — then tells you <span className="text-white/85">what it means</span>. Insights, patterns,
-              and recommendations built from your <span className="text-white/85">actual behavior</span>, not a questionnaire.
-            </motion.p>
+                {/* CTA row */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.6, ease: easeOut }}
+                  className="mt-9 flex flex-col sm:flex-row items-start sm:items-center gap-3"
+                >
+                  <motion.button
+                    whileHover={reducedMotion ? {} : { scale: 1.04, y: -2 }}
+                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                    onClick={() => goView("connect")}
+                    className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-base font-semibold text-white transition-shadow duration-300"
+                    style={{
+                      background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)",
+                      boxShadow: "0 10px 40px -10px rgba(79,140,255,0.6)",
+                    }}
+                  >
+                    Meet yourself
+                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
+                  </motion.button>
+                </motion.div>
 
-            {/* CTA row */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6, ease: easeOut }}
-              className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3"
-            >
-              <motion.button
-                whileHover={reducedMotion ? {} : { scale: 1.04, y: -2 }}
-                whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                onClick={() => goView("connect")}
-                className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-base font-semibold text-white transition-shadow duration-300"
-                style={{
-                  background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)",
-                  boxShadow: "0 10px 40px -10px rgba(79,140,255,0.6)",
-                }}
-              >
-                Connect your accounts
-                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
-              </motion.button>
-            </motion.div>
-
-            {/* Trust row */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.55 }}
-              className="mt-6 text-xs md:text-sm text-white/35 flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
-            >
-              <span className="inline-flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> We only read what you approve</span>
-              <span className="inline-flex items-center gap-1.5"><Lock className="w-3.5 h-3.5" /> No wallet needed</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Revoke anytime</span>
-            </motion.p>
-
-            {/* Source orbit — "You're more interesting than your bio." visual */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.9, ease: easeOut }}
-              className="mt-12 md:mt-14"
-            >
-              <SourceOrbit size={264} />
-            </motion.div>
-
-            {/* Product window (Framer-style desktop mockup) */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8, ease: easeOut }}
-              className="hidden lg:block mt-16 relative max-w-4xl mx-auto"
-            >
-              <div className="rounded-2xl border border-white/[0.08] bg-(--color-bg-elevated)/90 backdrop-blur-xl overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)]">
-                {/* window chrome */}
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] bg-white/[0.02]">
-                  <span className="w-3 h-3 rounded-full bg-red-500/70" />
-                  <span className="w-3 h-3 rounded-full bg-yellow-500/70" />
-                  <span className="w-3 h-3 rounded-full bg-green-500/70" />
-                  <div className="ml-4 flex items-center gap-2 px-3 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 text-xs">
-                    <Lock className="w-3 h-3" /> nodea.app
-                  </div>
-                </div>
-                <div className="grid grid-cols-5 gap-3 p-5">
-                  {DATA_SOURCES.map((src, i) => (
-                    <motion.div
-                      key={src.id}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.7 + i * 0.08, duration: 0.5 }}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-colors ${
-                        onboardedSources.has(src.id)
-                          ? "bg-emerald-500/[0.06] border-emerald-500/25"
-                          : "bg-white/[0.02] border-white/[0.06]"
-                      }`}
-                    >
-                      <BrandIcon id={src.icon} size={26} />
-                      <span className="text-[11px] text-white/60">{src.name}</span>
-                      {onboardedSources.has(src.id) ? (
-                        <CheckCircle className="w-4 h-4 text-emerald-400" />
-                      ) : null}
-                    </motion.div>
-                  ))}
-                </div>
+                {/* Trust row */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.55 }}
+                  className="mt-6 text-xs md:text-sm text-white/35 flex flex-wrap items-center gap-x-5 gap-y-2"
+                >
+                  <span className="inline-flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> We only read what you approve</span>
+                  <span className="inline-flex items-center gap-1.5"><Lock className="w-3.5 h-3.5" /> No wallet needed</span>
+                  <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Revoke anytime</span>
+                </motion.p>
               </div>
-              {/* glow under window */}
-              <div className="absolute -inset-x-10 -bottom-10 h-24 bg-gradient-to-r from-blue-600/20 via-cyan-600/20 to-blue-500/20 blur-3xl -z-10" />
-            </motion.div>
+
+              {/* Right: identity card — the star (built from demo mirror, same engine as real card) */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94, y: 24 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.45, duration: 0.8, ease: easeOut }}
+                className="relative max-w-md mx-auto w-full lg:ml-auto"
+              >
+                <div className="relative rounded-2xl border border-[--color-border-strong] bg-gradient-to-br from-[#223354]/60 via-[#16213B]/70 to-[#0F172A]/85 backdrop-blur-xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7),0_0_40px_-10px_rgba(79,140,255,0.4)] overflow-hidden p-7">
+                  {/* top radial sheen */}
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 80% -20%, rgba(0,212,255,0.12) 0%, transparent 55%)",
+                    }}
+                  />
+                  <div className="relative flex items-center justify-between mb-6">
+                    <span className="font-mono text-[11px] text-white/40 tracking-wider">
+                      nodea.app / your mirror
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                      ● Live
+                    </span>
+                  </div>
+
+                  {/* score ring + meta */}
+                  <div className="relative flex items-center gap-5 mb-6">
+                    <div
+                      className="w-[104px] h-[104px] rounded-full shrink-0 grid place-items-center"
+                      style={{
+                        background:
+                          "conic-gradient(#4F8CFF 0deg, #00D4FF 245deg, rgba(255,255,255,0.08) 245deg)",
+                        boxShadow: "0 0 24px -4px rgba(79,140,255,0.4)",
+                      }}
+                    >
+                      <div className="w-[82px] h-[82px] rounded-full bg-[#0F172A] border border-white/[0.06] grid place-items-center">
+                        <span className="font-display font-semibold text-3xl tracking-tighter text-white">
+                          {mirror.score.total}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300 mb-1">
+                        Grade {mirror.score.grade} — {gradeLabel}
+                      </div>
+                      <div className="font-display text-xl font-semibold tracking-tight text-white leading-tight">
+                        {mirror.card ? mirror.card.primaryArchetype.title : "Your mirror, forming"}
+                      </div>
+                      <div className="mt-1 text-[13px] text-white/45 leading-relaxed">
+                        {mirror.score.verdict}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* trait statement */}
+                  {mirror.card && (
+                    <div className="relative border-t border-white/[0.08] pt-5">
+                      <div className="text-[26px] leading-none mb-2">
+                        {mirror.card.primaryArchetype.emoji}
+                      </div>
+                      <div className="font-display text-lg font-semibold tracking-tight text-white mb-1.5">
+                        {mirror.card.primaryArchetype.tagline}
+                      </div>
+                      <p className="text-[13.5px] text-white/50 leading-relaxed">
+                        {mirror.card.primaryArchetype.fitRationale}
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <span className="inline-flex items-center rounded-lg border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-[11px] font-medium text-blue-300">
+                          3 / 7 Connected
+                        </span>
+                        {mirror.card.alternatives.slice(0, 2).map((a) => (
+                          <span
+                            key={a.title}
+                            className="inline-flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[11px] font-medium text-white/50"
+                          >
+                            {a.emoji} {a.title}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* glow under card */}
+                <div className="absolute -inset-x-10 -bottom-10 h-24 bg-gradient-to-r from-blue-600/20 via-cyan-600/20 to-blue-500/20 blur-3xl -z-10" />
+              </motion.div>
+            </div>
           </motion.section>
 
           {/* ── Your Mirror — example preview (built from the same engine that
