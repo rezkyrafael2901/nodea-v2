@@ -1224,7 +1224,7 @@ export default function PageClient({
                   alt=""
                   width={16}
                   height={17}
-                  className="-translate-y-[2.5px]"
+                  className="-translate-y-[0.5px]"
                   draggable={false}
                 />
                 <span className="font-display text-2xl font-semibold text-white leading-none">ODEA</span>
