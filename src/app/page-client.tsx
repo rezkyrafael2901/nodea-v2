@@ -1218,16 +1218,9 @@ export default function PageClient({
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16 md:h-[72px]">
               {/* Logo — N mark + ODEA lockup (one-word look) */}
-              <button onClick={() => goView("home")} className="flex items-center gap-[2px] shrink-0 min-h-[44px]" aria-label="Nodea home">
-                <img
-                  src="/nodea-logo-white.png"
-                  alt=""
-                  width={16}
-                  height={17}
-                  className="-translate-y-[0.5px]"
-                  draggable={false}
-                />
-                <span className="font-display text-2xl font-semibold text-white leading-none">ODEA</span>
+              <button onClick={() => goView("home")} className="flex items-center gap-2.5 shrink-0 min-h-[44px]" aria-label="Nodea home">
+                <AppLogo size={34} />
+                <span className="font-display text-lg font-semibold tracking-tight text-white leading-none">NODEA</span>
               </button>
 
               {/* Center nav (desktop) */}
