@@ -1217,10 +1217,10 @@ export default function PageClient({
           >
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16 md:h-[72px]">
-              {/* Logo */}
-              <button onClick={() => goView("home")} className="flex items-center gap-2.5 shrink-0 min-h-[44px]" aria-label="Nodea home">
-                <AppLogo size={34} />
-                <span className="font-display text-lg font-semibold tracking-tight text-white">Nodea</span>
+              {/* Logo — N mark + ODEA lockup */}
+              <button onClick={() => goView("home")} className="flex items-center gap-2 shrink-0 min-h-[44px]" aria-label="Nodea home">
+                <AppLogo size={42} />
+                <span className="font-display text-2xl font-semibold tracking-tight text-white">ODEA</span>
               </button>
 
               {/* Center nav (desktop) */}
