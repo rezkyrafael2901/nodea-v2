@@ -33,7 +33,6 @@ import {
   ChevronDown,
   Layers,
   Zap,
-  Home,
   Brain,
   Users,
   Menu,
@@ -52,7 +51,6 @@ import {
   Trophy,
   Star,
   Newspaper,
-  CreditCard,
   TrendingUp,
   ArrowUpRight,
   BarChart2,
@@ -1093,7 +1091,7 @@ export default function PageClient({
       animate="animate"
       variants={pageVariants}
       className="min-h-dvh bg-[var(--color-bg)] text-white relative overflow-x-hidden"
-      style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom))" }}
+      style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
     >
       {/* ── Animated Background ── */}
       <motion.div
@@ -1157,6 +1155,8 @@ export default function PageClient({
               {variant === "landing" && (
                 <nav className="hidden md:flex items-center gap-1">
                   {([
+                    { v: "home", label: "Home" },
+                    { v: "standings", label: "Standings" },
                     { v: "home", label: "How it works", anchor: "how" },
                     { v: "home", label: "Privacy", anchor: "privacy" },
                     { v: "home", label: "FAQ", anchor: "faq" },
@@ -1257,6 +1257,8 @@ export default function PageClient({
                   <div className="py-3 space-y-1 border-t border-[#94A3B8]/10 bg-[#0B1222]/95">
                     {variant === "landing" &&
                       ([
+                        { v: "home", label: "Home" },
+                        { v: "standings", label: "Standings" },
                         { v: "home", label: "How it works", anchor: "how" },
                         { v: "home", label: "Privacy", anchor: "privacy" },
                         { v: "home", label: "FAQ", anchor: "faq" },
@@ -3271,43 +3273,6 @@ export default function PageClient({
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* ── Bottom Nav (Patina-style tab bar) ── */}
-        <nav
-          className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] bg-(--color-bg)/90 backdrop-blur-2xl"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-          aria-label="Primary"
-        >
-          <div className={`mx-auto max-w-lg grid ${variant === "app" ? "grid-cols-3" : "grid-cols-2"}`}>
-            {(variant === "landing"
-              ? [
-                  { v: "home", label: "Home", icon: Home },
-                  { v: "standings", label: "Standings", icon: Trophy },
-                ]
-              : [
-                  { v: "card", label: "Overview", icon: CreditCard },
-                  { v: "identity", label: "Identity", icon: Users },
-                  { v: "insights", label: "Insights", icon: Sparkles },
-                ]
-            ).map((t) => {
-              const active = view === t.v;
-              return (
-                <button
-                  key={t.v}
-                  onClick={() => goView(t.v as ViewKey)}
-                  className={`flex flex-col items-center justify-center gap-1 pt-2.5 pb-2 transition-colors ${
-                    active ? "text-cyan-400" : "text-white/45 hover:text-white/70"
-                  }`}
-                  aria-current={active ? "page" : undefined}
-                >
-                  <t.icon className="w-5 h-5" strokeWidth={active ? 2.2 : 1.8} />
-                  <span className="text-[10px] font-medium tracking-wide">{t.label}</span>
-                  <span className={`h-1 w-1 rounded-full transition-colors ${active ? "bg-cyan-400" : "bg-transparent"}`} />
-                </button>
-              );
-            })}
-          </div>
-        </nav>
       </div>
     </motion.div>
   );
