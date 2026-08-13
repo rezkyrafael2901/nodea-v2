@@ -1605,90 +1605,21 @@ export default function PageClient({
               </p>
             </div>
 
-            {mirror.card ? (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-                className="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-4xl mx-auto"
-              >
-                {/* Score tile */}
-                <motion.div
-                  className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 glass glass-border"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.15, duration: 0.5 }}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-blue-500/15">
-                      <BarChart2 className="w-5 h-5 text-blue-300" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-white">Your Nodea Score</div>
-                      <div className="tracking-ui text-[10px] uppercase tracking-wider text-white/35">
-                        Built from connected activity, not answers
-                      </div>
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mt-8">
+              {[
+                { icon: BarChart2, title: "Score", desc: "0–100 built from five signals in your real activity." },
+                { icon: Brain, title: "Archetype", desc: "A personality pattern your data reveals — not one you pick." },
+                { icon: BookOpen, title: "Story", desc: "A short narrative that ties your habits into who you are." },
+              ].map((f) => (
+                <div key={f.title} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 text-center">
+                  <div className="inline-flex p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 mb-3">
+                    <f.icon className="w-5 h-5 text-cyan-300" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                      <div className="font-display font-semibold text-3xl text-white">{mirror.score.total}</div>
-                      <div className="text-[10px] uppercase tracking-wider text-white/35">out of 100</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                      <div className="font-display font-semibold text-3xl" style={{ color: gradeColor }}>
-                        Grade {mirror.score.grade}
-                      </div>
-                      <div className="text-[10px] uppercase tracking-wider text-white/35">{gradeLabel}</div>
-                    </div>
-                  </div>
-                  <div className="mt-4 text-xs text-white/40 leading-relaxed">{mirror.score.verdict}</div>
-                </motion.div>
-
-                {/* Identity card preview */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                  className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 glass glass-border flex flex-col"
-                >
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <span className="text-2xl">{mirror.card.primaryArchetype.emoji}</span>
-                    <h3 className="font-display text-lg font-semibold text-white">
-                      {mirror.card.primaryArchetype.title}
-                    </h3>
-                  </div>
-                  <p className="text-cyan-300 font-medium text-sm mb-2">
-                    {mirror.card.primaryArchetype.tagline}
-                  </p>
-                  <p className="text-xs text-white/50 leading-relaxed flex-1">
-                    {mirror.card.primaryArchetype.fitRationale}
-                  </p>
-                  {mirror.card.alternatives.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-1">
-                      <div className="text-[10px] uppercase tracking-wider text-white/35">
-                        Also fits
-                      </div>
-                      {mirror.card.alternatives.map((a) => (
-                        <div key={a.title} className="flex items-center gap-1.5 text-xs text-white/55">
-                          <span>{a.emoji}</span>
-                          <span>{a.title}</span>
-                          <span className="text-white/25">· {a.source}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
-              </motion.div>
-            ) : (
-              <div className="text-center py-8 text-white/40 text-sm max-w-md mx-auto">
-                Connect any account to generate your real mirror. While you read this,
-                your pattern is already waiting behind the connect button.
-              </div>
-            )}
+                  <div className="font-display text-sm font-semibold text-white mb-1">{f.title}</div>
+                  <p className="text-xs text-white/45 leading-relaxed">{f.desc}</p>
+                </div>
+              ))}
+            </div>
 
             <div className="mt-8 text-center">
               <motion.button
