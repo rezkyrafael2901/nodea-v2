@@ -906,7 +906,7 @@ export default function PageClient({
         animate="animate"
         whileHover={reducedMotion ? {} : "hover"}
         whileTap={reducedMotion ? {} : "tap"}
-        className={`group relative flex h-full flex-col rounded-2xl border p-5 transition-all duration-300 ease-out ${
+        className={`group relative flex h-full flex-col rounded-xl border p-4 transition-all duration-300 ease-out ${
           highlightSource === source.id
             ? "ring-2 ring-cyan-400/70 border-cyan-400/40 shadow-[0_0_28px_-4px_rgba(0,212,255,0.45)]"
             : ""
@@ -920,18 +920,18 @@ export default function PageClient({
             : "glass glass-border-hover hover:bg-white/[0.03]"
         }`}
       >
-        <div className="flex items-start gap-3.5 min-w-0">
+        <div className="flex items-start gap-3 min-w-0">
           <motion.div
             whileHover={reducedMotion ? {} : { scale: 1.1, rotate: -3 }}
             className="shrink-0 transition-transform duration-300 ease-out"
           >
-            <BrandIconTile id={source.icon} size={48} />
+            <BrandIconTile id={source.icon} size={36} />
           </motion.div>
-          <div className="min-w-0 flex-1 pt-1">
+          <div className="min-w-0 flex-1 pt-0.5">
             <motion.h3
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="font-medium text-white group-hover:text-white transition-colors duration-300 truncate flex items-center gap-2"
+              className="font-medium text-white text-sm group-hover:text-white transition-colors duration-300 truncate flex items-center gap-2"
             >
               {source.name}
               {isConnected && (
@@ -943,7 +943,7 @@ export default function PageClient({
             <motion.p
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-xs text-white/45 truncate transition-colors duration-300 group-hover:text-white/60 mt-0.5"
+              className="text-[11px] text-white/45 truncate transition-colors duration-300 group-hover:text-white/60 mt-0.5"
             >
               {source.description}
             </motion.p>
@@ -954,7 +954,7 @@ export default function PageClient({
           <motion.p
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="mt-3 text-[11px] text-white/35 leading-relaxed line-clamp-2"
+            className="mt-2.5 text-[11px] text-white/35 leading-relaxed line-clamp-2"
           >
             {source.findIt.join(" ")}
           </motion.p>
@@ -964,7 +964,7 @@ export default function PageClient({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-3 text-[11px] text-white/35 leading-relaxed"
+            className="mt-2.5 text-[11px] text-white/35 leading-relaxed"
           >
             <span className="text-yellow-400/70 font-medium">Profile</span> works anywhere.{" "}
             <span className="text-blue-300/70 font-medium">Deep</span> pulls watch history, likes &
@@ -976,17 +976,17 @@ export default function PageClient({
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-3 text-[11px] text-amber-400/80 leading-relaxed"
+            className="mt-2.5 text-[11px] text-amber-400/80 leading-relaxed"
           >
             Connection failed. Try again or cancel.
           </motion.p>
         )}
 
-        <div className="mt-auto pt-4">
+        <div className="mt-auto pt-3">
           {isConnected ? (
-            <div className="flex items-center justify-between gap-2 text-xs text-emerald-400">
-              <div className="flex items-center gap-2 min-w-0">
-                <Zap className="w-3.5 h-3.5 shrink-0" />
+            <div className="flex items-center justify-between gap-2 text-[11px] text-emerald-400">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Zap className="w-3 h-3 shrink-0" />
                 <span className="truncate">Contributing to your Nodea Score</span>
               </div>
               <motion.button
@@ -994,45 +994,45 @@ export default function PageClient({
                 whileHover={reducedMotion ? {} : { scale: 1.04 }}
                 whileTap={reducedMotion ? {} : { scale: 0.95 }}
                 onClick={() => disconnectSource(source.id)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/30 transition-colors shrink-0"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/30 transition-colors shrink-0"
                 title={`Disconnect ${source.name} — remove its data from your mirror`}
               >
-                <Trash2 className="w-3.5 h-3.5" /> Disconnect
+                <Trash2 className="w-3 h-3" /> Disconnect
               </motion.button>
             </div>
           ) : (
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-1.5">
               {disabledOnMobile ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] text-white/30 bg-white/[0.02] border border-white/[0.04]">
-                  <Monitor className="w-3.5 h-3.5" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] text-white/30 bg-white/[0.02] border border-white/[0.04]">
+                  <Monitor className="w-3 h-3" />
                   <span>Desktop only</span>
                 </div>
               ) : isConnecting ? (
                 <>
-                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/10 px-3 py-1.5 text-[11px] font-medium text-blue-300">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span className="inline-flex items-center gap-1 rounded-lg border border-blue-500/25 bg-blue-500/10 px-2.5 py-1 text-[10px] font-medium text-blue-300">
+                    <Loader2 className="w-3 h-3 animate-spin" />
                     {connectState === "awaiting_approval" ? "Waiting for approval…" : "Connecting…"}
                   </span>
                   <button
                     onClick={cancelConnect}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-[11px] font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-2.5 py-1 text-[10px] font-medium text-red-400 hover:bg-red-500/10 transition-colors"
                   >
-                    <X className="w-3.5 h-3.5" /> Cancel
+                    <X className="w-3 h-3" /> Cancel
                   </button>
                 </>
               ) : hasError ? (
                 <>
                   <button
                     onClick={() => openLinkCheck(source, connectLabel)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-1.5 text-[11px] font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 px-2.5 py-1 text-[10px] font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" /> Try again
+                    <RotateCcw className="w-3 h-3" /> Try again
                   </button>
                   <button
                     onClick={cancelConnect}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-medium text-white/50 hover:bg-white/5 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2.5 py-1 text-[10px] font-medium text-white/50 hover:bg-white/5 transition-colors"
                   >
-                    <X className="w-3.5 h-3.5" /> Cancel
+                    <X className="w-3 h-3" /> Cancel
                   </button>
                 </>
               ) : isHybrid && isDesktop && !isConnected ? (
@@ -1040,7 +1040,7 @@ export default function PageClient({
                   <button
                     onClick={() => openLinkCheck(source, "web")}
                     disabled={isDisabled}
-                    className="inline-flex items-center justify-center min-h-[36px] px-4 py-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs font-medium transition-colors"
+                    className="inline-flex items-center justify-center min-h-[30px] px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium transition-colors"
                     title="Profile only — works anywhere"
                   >
                     Profile
@@ -1048,7 +1048,7 @@ export default function PageClient({
                   <button
                     onClick={() => openLinkCheck(source, "full")}
                     disabled={isDisabled}
-                    className="inline-flex items-center justify-center min-h-[36px] px-4 py-2 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 hover:border-blue-500/50 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs font-medium text-blue-200 transition-colors"
+                    className="inline-flex items-center justify-center min-h-[30px] px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 hover:border-blue-500/50 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium text-blue-200 transition-colors"
                     title="Watch history, likes, subscriptions — needs Vana Desktop"
                   >
                     Deep
@@ -1058,7 +1058,7 @@ export default function PageClient({
                 <button
                   onClick={() => openLinkCheck(source, connectLabel)}
                   disabled={isDisabled}
-                  className={`inline-flex items-center justify-center min-h-[36px] gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`inline-flex items-center justify-center min-h-[30px] gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     hasError
                       ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
                       : "border border-cyan-400/30 bg-cyan-400/[0.06] text-cyan-300 hover:bg-cyan-400/10 hover:border-cyan-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1066,18 +1066,18 @@ export default function PageClient({
                 >
                   {isConnected ? (
                     <>
-                      <Check className="w-4 h-4" />
+                      <Check className="w-3.5 h-3.5" />
                       Connected
                     </>
                   ) : isActiveSource ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       {connectState === "awaiting_approval" ? "Pending…" : "Connecting…"}
                     </>
                   ) : (
                     <>
                       Connect
-                      <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
+                      <ArrowUpRight className="w-3 h-3 opacity-60" />
                     </>
                   )}
                 </button>
@@ -1981,7 +1981,7 @@ export default function PageClient({
                 variants={{ animate: { transition: { staggerChildren: 0.05 } } }}
                 initial="initial"
                 animate="animate"
-                className="space-y-8"
+                className="space-y-6"
               >
                 {/* Connected Sources (PRD #10) */}
                 {identities.length > 0 && (
@@ -2007,11 +2007,11 @@ export default function PageClient({
                             key={id.source}
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20 text-sm text-emerald-300"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/[0.06] border border-emerald-500/20 text-xs text-emerald-300"
                           >
-                            {src && <BrandIcon id={src.icon} size={14} />}
+                            {src && <BrandIcon id={src.icon} size={12} />}
                             {id.source}
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                            <CheckCircle className="w-3 h-3 text-emerald-400" />
                           </motion.span>
                         );
                       })}
@@ -2041,7 +2041,7 @@ export default function PageClient({
                     </span>
                   </div>
                   <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                     variants={{ animate: { transition: { staggerChildren: 0.06 } } }}
                   >
                     {webSources.map((source, i) => (
@@ -2076,7 +2076,7 @@ export default function PageClient({
                     )}
                   </div>
                   <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                     variants={{ animate: { transition: { staggerChildren: 0.06 } } }}
                   >
                     {desktopSources.map((source, i) => (
@@ -2087,15 +2087,15 @@ export default function PageClient({
                     {!isDesktop && (
                       <motion.div
                         variants={cardVariants}
-                        className="md:col-span-2 p-5 rounded-2xl border border-dashed border-white/[0.06] bg-white/[0.01]"
+                        className="md:col-span-2 p-4 rounded-xl border border-dashed border-white/[0.06] bg-white/[0.01]"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-xl bg-orange-500/15 shrink-0">
-                            <Monitor className="w-5 h-5 text-orange-400" />
+                          <div className="p-1.5 rounded-lg bg-orange-500/15 shrink-0">
+                            <Monitor className="w-4 h-4 text-orange-400" />
                           </div>
                           <div>
-                            <p className="font-medium text-white/80 mb-1">Unlock Deep Data with Vana Desktop</p>
-                            <p className="text-white/40 text-sm leading-relaxed">
+                            <p className="font-medium text-white/80 mb-0.5 text-sm">Unlock Deep Data with Vana Desktop</p>
+                            <p className="text-white/40 text-xs leading-relaxed">
                               Steam games & playtime, YouTube watch history, ChatGPT conversations, Spotify listening history.
                               <br />
                               <span className="text-white/30 mt-2 inline-block">
