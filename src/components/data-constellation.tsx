@@ -6,7 +6,12 @@ import { useEffect, useRef } from "react";
  * DataConstellation — hero background constellation.
  *
  * Canvas-based particle field: ~70 nodes drifting slowly, connected by
- * proximity lines (data-graph metaphor). Mobile-safe:
+ * proximity lines (data-graph metaphor). Responsive density:
+ *  - desktop (≥1024px): full count (default 110), full link distance
+ *  - tablet (640–1024px): ~65% of count, shorter links
+ *  - mobile (<640px): ~42% of count, shorter links → less visual noise
+ *    on small screens (same dot density feel, eyes not distracted)
+ * Mobile-safe:
  *  - DPR capped at 2 (no retina blowup)
  *  - tab-hidden → RAF paused (no battery burn)
  *  - prefers-reduced-motion → static single frame, no loop
@@ -32,10 +37,39 @@ export default function DataConstellation({
     // NOTE: decorative ambient — always animates (brand motion).
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
+    type Breakpoint = "mobile" | "tablet" | "desktop";
+    const getBreakpoint = (vw: number): Breakpoint =>
+      vw < 640 ? "mobile" : vw < 1024 ? "tablet" : "desktop";
+
+    // Adaptive density: fewer dots on small screens so it never looks cramped.
+    const effectiveCount = (bp: Breakpoint): number => {
+      if (bp === "mobile") return Math.max(28, Math.round(count * 0.42));
+      if (bp === "tablet") return Math.max(45, Math.round(count * 0.65));
+      return count;
+    };
+    const effectiveLink = (bp: Breakpoint): number => {
+      if (bp === "mobile") return Math.round(linkDistance * 0.7);
+      if (bp === "tablet") return Math.round(linkDistance * 0.85);
+      return linkDistance;
+    };
+
+    const makeParticles = (n: number) =>
+      Array.from({ length: n }, () => ({
+        x: Math.random(),
+        y: Math.random(),
+        vx: (Math.random() - 0.5) * 0.0014,
+        vy: (Math.random() - 0.5) * 0.0014,
+        r: Math.random() * 1.6 + 1.2,
+        bright: Math.random() > 0.8,
+      }));
+
     let raf = 0;
     let running = !document.hidden;
     let w = 0;
     let h = 0;
+    let bp: Breakpoint = getBreakpoint(window.innerWidth);
+    let linkDist = effectiveLink(bp);
+    let particles = makeParticles(effectiveCount(bp));
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -50,17 +84,15 @@ export default function DataConstellation({
       canvas.width = Math.max(1, Math.round(w * dpr));
       canvas.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // regenerate on breakpoint change (e.g. rotate phone / resize window)
+      const nb = getBreakpoint(window.innerWidth);
+      if (nb !== bp) {
+        bp = nb;
+        linkDist = effectiveLink(bp);
+        particles = makeParticles(effectiveCount(bp));
+      }
       draw(0);
     };
-
-    const particles = Array.from({ length: count }, () => ({
-      x: Math.random(),
-      y: Math.random(),
-      vx: (Math.random() - 0.5) * 0.0014,
-      vy: (Math.random() - 0.5) * 0.0014,
-      r: Math.random() * 1.6 + 1.2,
-      bright: Math.random() > 0.8,
-    }));
 
     const draw = (dt: number) => {
       if (!ctx || w === 0 || h === 0) return;
@@ -83,8 +115,8 @@ export default function DataConstellation({
           const dx = (a.x - b.x) * w;
           const dy = (a.y - b.y) * h;
           const dist = Math.hypot(dx, dy);
-          if (dist < linkDistance) {
-            ctx.strokeStyle = `rgba(79,140,255,${(1 - dist / linkDistance) * 0.35})`;
+          if (dist < linkDist) {
+            ctx.strokeStyle = `rgba(79,140,255,${(1 - dist / linkDist) * 0.35})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(a.x * w, a.y * h);
