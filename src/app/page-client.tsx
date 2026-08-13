@@ -259,7 +259,6 @@ export default function PageClient({
   useEffect(() => {
     if (view === "connect" && pendingSource) {
       const id = pendingSource;
-      setPendingSource(null);
       const t = setTimeout(() => {
         const el = document.querySelector(`[data-source-id="${id}"]`);
         if (el) {
@@ -267,7 +266,9 @@ export default function PageClient({
           setHighlightSource(id);
           setTimeout(() => setHighlightSource(null), 3200);
         }
-      }, 120);
+        // clear setelah aksi jalan (bukan di body effect — itu cancel timeout via cleanup)
+        setPendingSource(null);
+      }, 150);
       return () => clearTimeout(t);
     }
   }, [view, pendingSource]);
