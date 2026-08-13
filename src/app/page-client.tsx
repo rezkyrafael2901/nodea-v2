@@ -164,6 +164,13 @@ export default function PageClient({
   variant?: PageVariant;
 }) {
   // ── State ──
+  const [activeNav, setActiveNav] = useState<string>(
+    initialView === "standings"
+      ? "Standings"
+      : initialView === "card" || initialView === "identity" || initialView === "insights"
+        ? "Mirror"
+        : "Home"
+  );
   const [onboardedSources, setOnboardedSources] = useState<Set<string>>(new Set());
   const [identities, setIdentities] = useState<IdentityData[]>([]);
   const [identityResult, setIdentityResult] = useState<Record<string, unknown> | null>(null);
@@ -250,6 +257,16 @@ export default function PageClient({
       // no full reload needed when switching tabs.
       if (window.location.pathname !== route) window.history.pushState({}, "", route);
     }
+    // Keep the header active-tab in sync with any navigation that happens outside
+    // the header itself (sub-tabs, CTAs, initial view). Anchor clicks from the
+    // header keep their own label via handleNav and are intentionally left alone.
+    if (v === "card" || v === "identity" || v === "insights") {
+      setActiveNav("Mirror");
+    } else if (v === "standings") {
+      setActiveNav("Standings");
+    } else if (v === "home" && !anchor) {
+      setActiveNav("Home");
+    }
     setTimeout(() => {
       if (anchor) {
         const el = document.getElementById(anchor);
@@ -259,6 +276,16 @@ export default function PageClient({
       }
     }, 80);
   }, [variant]);
+
+  // Header nav click — the pressed tab always lights up, even anchor items
+  // (How it works / Privacy / FAQ) which scroll inside the home page.
+  const handleNav = useCallback(
+    (item: { v: ViewKey; label: string; anchor?: string }) => {
+      setActiveNav(item.label);
+      goView(item.v as ViewKey, item.anchor);
+    },
+    [goView]
+  );
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -1159,18 +1186,18 @@ export default function PageClient({
               {/* Center nav (desktop) — same set on every tab */}
               <nav className="hidden md:flex items-center gap-1">
                 {([
-                  { v: "home", label: "Home", activeOn: "home" },
-                  { v: "card", label: "Mirror", activeOn: "card" },
-                  { v: "standings", label: "Standings", activeOn: "standings" },
-                  { v: "home", label: "How it works", anchor: "how", activeOn: null },
-                  { v: "home", label: "Privacy", anchor: "privacy", activeOn: null },
-                  { v: "home", label: "FAQ", anchor: "faq", activeOn: null },
-                ] as const).map((item: { v: ViewKey; label: string; anchor?: string; activeOn?: ViewKey | null }) => (
+                  { v: "home", label: "Home" },
+                  { v: "card", label: "Mirror" },
+                  { v: "standings", label: "Standings" },
+                  { v: "home", label: "How it works", anchor: "how" },
+                  { v: "home", label: "Privacy", anchor: "privacy" },
+                  { v: "home", label: "FAQ", anchor: "faq" },
+                ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
                   <button
                     key={item.label}
-                    onClick={() => goView(item.v as ViewKey, item.anchor)}
+                    onClick={() => handleNav(item as { v: ViewKey; label: string; anchor?: string })}
                     className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
-                      item.activeOn !== undefined && view === item.activeOn
+                      activeNav === item.label
                         ? "text-[#38BDF8] bg-[#38BDF8]/10"
                         : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
                     }`}
@@ -1234,18 +1261,18 @@ export default function PageClient({
                 >
                   <div className="py-3 space-y-1 border-t border-[#94A3B8]/10 bg-[#0B1222]/95">
                     {([
-                      { v: "home", label: "Home", activeOn: "home" },
-                      { v: "card", label: "Mirror", activeOn: "card" },
-                      { v: "standings", label: "Standings", activeOn: "standings" },
-                      { v: "home", label: "How it works", anchor: "how", activeOn: null },
-                      { v: "home", label: "Privacy", anchor: "privacy", activeOn: null },
-                      { v: "home", label: "FAQ", anchor: "faq", activeOn: null },
-                    ] as const).map((item: { v: ViewKey; label: string; anchor?: string; activeOn?: ViewKey | null }) => (
+                      { v: "home", label: "Home" },
+                      { v: "card", label: "Mirror" },
+                      { v: "standings", label: "Standings" },
+                      { v: "home", label: "How it works", anchor: "how" },
+                      { v: "home", label: "Privacy", anchor: "privacy" },
+                      { v: "home", label: "FAQ", anchor: "faq" },
+                    ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
                       <button
                         key={item.label}
-                        onClick={() => goView(item.v as ViewKey, item.anchor)}
+                        onClick={() => handleNav(item as { v: ViewKey; label: string; anchor?: string })}
                         className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                          item.activeOn !== undefined && view === item.activeOn
+                          activeNav === item.label
                             ? "text-[#38BDF8] bg-[#38BDF8]/10"
                             : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
                         }`}
