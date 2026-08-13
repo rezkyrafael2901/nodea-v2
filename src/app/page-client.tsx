@@ -212,18 +212,31 @@ export default function PageClient({
   const [view, setView] = useState<ViewKey>(initialView);
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
   // Pre-selected source dari home card → connect view (scroll + highlight)
-  const [pendingSource, setPendingSource] = useState<string | null>(null);
-  const [highlightSource, setHighlightSource] = useState<string | null>(null);
+  // (Tab Connect dihapus — state ini tidak dipakai lagi)
 
   const goView = useCallback((v: ViewKey, anchor?: string) => {
     setNavOpen(false);
+    // Tab Connect dihapus — semua entry point connect diarahkan ke home + scroll ke source grid
+    if (v === "connect") {
+      setView("home");
+      if (typeof window !== "undefined") {
+        if (window.location.pathname !== "/") window.history.pushState({}, "", "/");
+        const el = document.getElementById("sources");
+        setTimeout(() => {
+          if (el) {
+            window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: "smooth" });
+          } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        }, 80);
+      }
+      return;
+    }
     setView(v);
     if (typeof window !== "undefined") {
     const route =
       v === "home"
         ? "/"
-        : v === "connect"
-        ? "/connect"
         : v === "card"
         ? "/app"
         : v === "identity"
@@ -246,32 +259,6 @@ export default function PageClient({
       }
     }, 80);
   }, []);
-
-  // Home card → buka connect view + scroll ke source tertentu + highlight sementara
-  const goConnectSource = useCallback(
-    (sourceId: string) => {
-      setPendingSource(sourceId);
-      goView("connect");
-    },
-    [goView]
-  );
-
-  useEffect(() => {
-    if (view === "connect" && pendingSource) {
-      const id = pendingSource;
-      const t = setTimeout(() => {
-        const el = document.querySelector(`[data-source-id="${id}"]`);
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-          setHighlightSource(id);
-          setTimeout(() => setHighlightSource(null), 3200);
-        }
-        // clear setelah aksi jalan (bukan di body effect — itu cancel timeout via cleanup)
-        setPendingSource(null);
-      }, 150);
-      return () => clearTimeout(t);
-    }
-  }, [view, pendingSource]);
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -879,7 +866,8 @@ export default function PageClient({
   const desktopSources = DATA_SOURCES.filter((s) => s.platform === "desktop");
   const hybridSources = DATA_SOURCES.filter((s) => s.platform === "hybrid");
 
-  const renderSourceCard = (source: DataSource, index: number) => {
+  // Action area (Connect / Connected / Desktop only / states) — reusable di card home
+  const renderSourceActions = (source: DataSource) => {
     const isConnected = onboardedSources.has(source.id);
     const isDesktopOnly = source.platform === "desktop";
     const isHybrid = source.platform === "hybrid";
@@ -897,149 +885,103 @@ export default function PageClient({
     const connectLabel = isDesktopOnly ? "full" : "web";
 
     return (
-      <motion.div
-        key={source.id}
-        data-source-id={source.id}
-        variants={cardVariants}
-        custom={index}
-        initial="initial"
-        animate="animate"
-        whileHover={reducedMotion ? {} : "hover"}
-        whileTap={reducedMotion ? {} : "tap"}
-        className={`group relative flex items-center gap-3 rounded-xl border px-3.5 py-2.5 min-h-[72px] transition-all duration-300 ease-out ${
-          highlightSource === source.id
-            ? "ring-2 ring-cyan-400/70 border-cyan-400/40 shadow-[0_0_28px_-4px_rgba(0,212,255,0.45)]"
-            : ""
-        } ${
-          isConnected
-            ? "bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40"
-            : disabledOnMobile
-            ? "bg-white/[0.01] border-white/[0.04] opacity-60"
-            : hasError
-            ? "border-amber-500/30 bg-amber-500/[0.03] hover:border-amber-500/50"
-            : "glass glass-border-hover hover:bg-white/[0.03]"
-        }`}
-      >
-        <motion.div
-          whileHover={reducedMotion ? {} : { scale: 1.08, rotate: -3 }}
-          className="shrink-0 transition-transform duration-300 ease-out"
-        >
-          <BrandIconTile id={source.icon} size={40} />
-        </motion.div>
-
-        <div className="min-w-0 flex-1">
-          <motion.h3
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="font-medium text-white text-sm group-hover:text-white transition-colors duration-300 truncate"
-          >
-            {source.name}
-          </motion.h3>
-        </div>
-
-        <div className="shrink-0">
-          {isConnected ? (
-            <div className="flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs font-medium text-emerald-300">
-                <Check className="w-3.5 h-3.5" /> Connected
-              </span>
-              <motion.button
-                type="button"
-                whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                onClick={() => disconnectSource(source.id)}
-                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 transition-colors"
-                title={`Disconnect ${source.name} — remove its data from your mirror`}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </motion.button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              {disabledOnMobile ? (
-                <div className="inline-flex items-center justify-center h-8 px-3 rounded-lg text-[11px] text-white/35 bg-white/[0.02] border border-white/[0.06]">
-                  <Monitor className="w-3.5 h-3.5 mr-1.5" />
-                  Desktop only
-                </div>
-              ) : isConnecting ? (
-                <>
-                  <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-blue-500/25 bg-blue-500/10 text-[11px] font-medium text-blue-300">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    {connectState === "awaiting_approval" ? "Waiting…" : "Connecting…"}
-                  </span>
-                  <button
-                    onClick={cancelConnect}
-                    className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-red-500/30 text-[11px] font-medium text-red-400 hover:bg-red-500/10 transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </>
-              ) : hasError ? (
-                <>
-                  <button
-                    onClick={() => openLinkCheck(source, connectLabel)}
-                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-500/30 text-[11px] font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" /> Retry
-                  </button>
-                  <button
-                    onClick={cancelConnect}
-                    className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-white/10 text-[11px] font-medium text-white/50 hover:bg-white/5 transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </>
-              ) : isHybrid && isDesktop && !isConnected ? (
-                <>
-                  <button
-                    onClick={() => openLinkCheck(source, "web")}
-                    disabled={isDisabled}
-                    className="inline-flex items-center justify-center h-8 px-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium transition-colors"
-                    title="Profile only — works anywhere"
-                  >
-                    Profile
-                  </button>
-                  <button
-                    onClick={() => openLinkCheck(source, "full")}
-                    disabled={isDisabled}
-                    className="inline-flex items-center justify-center h-8 px-3 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 hover:border-blue-500/50 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium text-blue-200 transition-colors"
-                    title="Watch history, likes, subscriptions — needs Vana Desktop"
-                  >
-                    Deep
-                  </button>
-                </>
-              ) : (
+      <div className="flex items-center gap-1.5">
+        {isConnected ? (
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs font-medium text-emerald-300">
+              <Check className="w-3.5 h-3.5" /> Connected
+            </span>
+            <motion.button
+              type="button"
+              whileHover={reducedMotion ? {} : { scale: 1.05 }}
+              whileTap={reducedMotion ? {} : { scale: 0.95 }}
+              onClick={() => disconnectSource(source.id)}
+              className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 transition-colors"
+              title={`Disconnect ${source.name} — remove its data from your mirror`}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </motion.button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            {disabledOnMobile ? (
+              <div className="inline-flex items-center justify-center h-8 px-3 rounded-lg text-[11px] text-white/35 bg-white/[0.02] border border-white/[0.06]">
+                <Monitor className="w-3.5 h-3.5 mr-1.5" />
+                Desktop only
+              </div>
+            ) : isConnecting ? (
+              <>
+                <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-blue-500/25 bg-blue-500/10 text-[11px] font-medium text-blue-300">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  {connectState === "awaiting_approval" ? "Waiting…" : "Connecting…"}
+                </span>
+                <button
+                  onClick={cancelConnect}
+                  className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-red-500/30 text-[11px] font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </>
+            ) : hasError ? (
+              <>
                 <button
                   onClick={() => openLinkCheck(source, connectLabel)}
-                  disabled={isDisabled}
-                  className={`inline-flex items-center justify-center h-8 min-w-[88px] gap-1.5 px-3.5 rounded-lg text-xs font-semibold transition-all ${
-                    hasError
-                      ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
-                      : "bg-cyan-400 text-slate-950 hover:bg-cyan-300 shadow-[0_0_16px_-4px_rgba(34,211,238,0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
-                  }`}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-500/30 text-[11px] font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
                 >
-                  {isConnected ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      Connected
-                    </>
-                  ) : isActiveSource ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      {connectState === "awaiting_approval" ? "Pending…" : "Connecting…"}
-                    </>
-                  ) : (
-                    <>
-                      Connect
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </>
-                  )}
+                  <RotateCcw className="w-3.5 h-3.5" /> Retry
                 </button>
-              )}
-            </div>
-          )}
-        </div>
-      </motion.div>
+                <button
+                  onClick={cancelConnect}
+                  className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-white/10 text-[11px] font-medium text-white/50 hover:bg-white/5 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </>
+            ) : isHybrid && isDesktop && !isConnected ? (
+              <>
+                <button
+                  onClick={() => openLinkCheck(source, "web")}
+                  disabled={isDisabled}
+                  className="inline-flex items-center justify-center h-8 px-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium transition-colors"
+                  title="Profile only — works anywhere"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => openLinkCheck(source, "full")}
+                  disabled={isDisabled}
+                  className="inline-flex items-center justify-center h-8 px-3 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 hover:border-blue-500/50 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium text-blue-200 transition-colors"
+                  title="Watch history, likes, subscriptions — needs Vana Desktop"
+                >
+                  Deep
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => openLinkCheck(source, connectLabel)}
+                disabled={isDisabled}
+                className={`inline-flex items-center justify-center h-8 min-w-[88px] gap-1.5 px-3.5 rounded-lg text-xs font-semibold transition-all ${
+                  hasError
+                    ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
+                    : "bg-cyan-400 text-slate-950 hover:bg-cyan-300 shadow-[0_0_16px_-4px_rgba(34,211,238,0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
+                }`}
+              >
+                {isActiveSource ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    {connectState === "awaiting_approval" ? "Pending…" : "Connecting…"}
+                  </>
+                ) : (
+                  <>
+                    Connect
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -1233,13 +1175,6 @@ export default function PageClient({
                   ))}
                 </nav>
               )}
-              {variant === "connect" && (
-                <nav className="hidden md:flex items-center gap-1">
-                  <span className="px-3.5 py-2 rounded-lg text-sm font-medium text-[#38BDF8] bg-[#38BDF8]/10 inline-flex items-center min-h-[44px]">
-                    Connect
-                  </span>
-                </nav>
-              )}
               {variant === "app" && (
                 <nav className="hidden md:flex items-center gap-1">
                   {([
@@ -1286,17 +1221,6 @@ export default function PageClient({
                       <ArrowRight className="w-4 h-4" />
                     </motion.button>
                   </>
-                )}
-                {variant === "connect" && (
-                  <motion.button
-                    whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
-                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                    onClick={() => goView("home")}
-                    className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#94A3B8] hover:text-white bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-colors"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                  </motion.button>
                 )}
                 {variant === "app" && (
                   <motion.button
@@ -1354,7 +1278,6 @@ export default function PageClient({
                         { v: "card", label: "Overview" },
                         { v: "identity", label: "Identity" },
                         { v: "insights", label: "Insights" },
-                        { v: "connect", label: "Add source" },
                       ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
                         <button
                           key={item.label}
@@ -1368,14 +1291,6 @@ export default function PageClient({
                           {item.label}
                         </button>
                       ))}
-                    {variant === "connect" && (
-                      <button
-                        onClick={() => goView("home")}
-                        className="w-full text-left px-3 py-3 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04] transition-colors"
-                      >
-                        ← Back to home
-                      </button>
-                    )}
                     {variant === "landing" && (
                       <button
                         onClick={() => goView("connect")}
@@ -1628,6 +1543,7 @@ export default function PageClient({
 
           {/* ── What you'll get — per-source output preview ── */}
           <motion.section
+            id="sources"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
@@ -1648,8 +1564,6 @@ export default function PageClient({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
               {DATA_SOURCES.map((source) => {
-                const srcConnected = onboardedSources.has(source.id);
-                const srcDesktopOnly = source.platform === "desktop" && !isDesktop;
                 return (
                   <motion.div
                     key={source.id}
@@ -1657,8 +1571,7 @@ export default function PageClient({
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4 }}
-                    onClick={() => goConnectSource(source.id)}
-                    className="group relative flex h-full cursor-pointer flex-col rounded-2xl border border-white/[0.1] p-5 transition-all duration-300 hover:border-white/[0.2]"
+                    className="group relative flex h-full flex-col rounded-2xl border border-white/[0.1] p-5 transition-all duration-300 hover:border-white/[0.2]"
                     style={{
                       background:
                         "linear-gradient(135deg, rgba(79,140,255,0.32) 0%, rgba(0,212,255,0.32) 100%)",
@@ -1680,19 +1593,7 @@ export default function PageClient({
                       {source.outputSummary}
                     </p>
                     <div className="mt-4 flex items-center justify-between gap-2">
-                      {srcConnected ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-1.5 text-[11px] font-medium text-emerald-400">
-                          <Check className="w-3 h-3" /> Connected
-                        </span>
-                      ) : srcDesktopOnly ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-white/30">
-                          <Monitor className="w-3 h-3" /> Desktop only
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/25 bg-cyan-400/[0.06] px-3 py-1.5 text-[11px] font-medium text-cyan-300 transition-colors group-hover:bg-cyan-400/[0.12] group-hover:border-cyan-400/50">
-                          Mirror now <ArrowRight className="w-3 h-3" />
-                        </span>
-                      )}
+                      {renderSourceActions(source)}
                     </div>
                     </div>
                   </motion.div>
@@ -1701,20 +1602,7 @@ export default function PageClient({
             </div>
 
             <div className="mt-8 text-center">
-              <p className="text-xs text-white/35 mb-4">Tap any card to jump straight to Connect — or start from the tab above.</p>
-              <motion.button
-                whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
-                whileTap={reducedMotion ? {} : { scale: 0.98 }}
-                onClick={() => goView("connect")}
-                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium text-white transition-all"
-                style={{
-                  background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)",
-                  boxShadow: "0 0 20px -4px rgba(79,140,255,0.5)",
-                }}
-              >
-                Connect your accounts
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
+              <p className="text-xs text-white/35">Connect straight from each card — no separate tab needed.</p>
             </div>
           </motion.section>
 
@@ -1760,309 +1648,7 @@ export default function PageClient({
             </>
           )}
 
-          {view === "connect" && (
-            <div className="pt-8 md:pt-12">
-          {/* ── Status / Error / Referral ── */}
-          <AnimatePresence mode="wait">
-            {statusMessage && (
-              <motion.div
-                key={connectState}
-                initial={{ opacity: 0, y: -20, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -20, height: 0 }}
-                transition={{ duration: 0.3, ease: easeOut }}
-                className={`mb-8 p-4 rounded-2xl text-sm border flex items-start gap-3 ${
-                  connectState === "error"
-                    ? "bg-red-500/10 border-red-500/20 text-red-400"
-                    : connectState === "done"
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                    : "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                }`}
-              >
-                {connectState === "error" && <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />}
-                {connectState === "done" && <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />}
-                {connectState !== "error" && connectState !== "done" && <Loader2 className="w-5 h-5 mt-0.5 flex-shrink-0 animate-spin text-blue-400" />}
-                <span className="flex-1">{statusMessage}</span>
-                {(connectState === "awaiting_approval" || connectState === "requesting") && (
-                  <button
-                    onClick={cancelConnect}
-                    className="inline-flex items-center justify-center min-h-[36px] px-3 py-1 rounded-lg text-xs font-medium text-white/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors flex-shrink-0"
-                  >
-                    Cancel
-                  </button>
-                )}
-              </motion.div>
-            )}
-
-            {error && !statusMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -20, height: 0 }}
-                className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-start gap-3"
-              >
-                <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span>{error}</span>
-              </motion.div>
-            )}
-
-            {connectState === "awaiting_approval" && !popupRef.current && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                className="mb-8 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl text-sm"
-              >
-                <div className="flex items-center gap-2 text-yellow-400 font-medium mb-2">
-                  <AlertCircle className="w-5 h-5" />
-                  Popup was blocked — approve in a new tab instead
-                </div>
-                <p className="text-white/60 mb-3">
-                  Click the link below, log in to Vana, and approve the request.{" "}
-                  <strong>Keep both tabs open</strong> until this page says connected.
-                </p>
-                <a
-                  href={`https://app.vana.org/data-connection-requests/${activeRequestId}?mode=page`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center min-h-[44px] gap-2 px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-300 rounded-xl font-medium transition-colors"
-                >
-                  Open Vana approval
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-                <button
-                  onClick={cancelConnect}
-                  className="inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-medium text-white/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors ml-3"
-                >
-                  Cancel
-                </button>
-              </motion.div>
-            )}
-
-            {connectState === "awaiting_approval" && popupRef.current && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                className="mb-8 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-sm"
-              >
-                <div className="flex items-center gap-2 text-blue-300 font-medium mb-1">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Waiting for approval…
-                </div>
-                <p className="text-white/60">
-                  Approve access in the Vana window.{" "}
-                  <strong>Keep both tabs open</strong> until it says connected.
-                </p>
-                <button
-                  onClick={cancelConnect}
-                  className="inline-flex items-center justify-center min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-medium text-white/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors mt-3"
-                >
-                  Cancel
-                </button>
-              </motion.div>
-            )}
-
-            {generating && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                className="mb-8 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-blue-400 text-sm flex items-center gap-2"
-              >
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Generating your Nodea card…</span>
-              </motion.div>
-            )}
-
-            {refFrom && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, height: 0, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, height: "auto", scale: 1 }}
-                className="mb-8 p-4 rounded-2xl text-sm flex items-center gap-3 border bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/20 text-amber-200"
-              >
-                <motion.div
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="p-2 rounded-xl bg-amber-500/20"
-                >
-                  <Trophy className="w-5 h-5" />
-                </motion.div>
-                <div>
-                  <p className="font-medium">
-                    🏆 You came from a Nodea Card{" "}
-                    <span className="font-semibold gradient-brand">Grade {refFrom}</span> —
-                    connect your data and try to beat their score!
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* ── Main Grid ── */}
-          <motion.div
-            id="connect"
-            variants={sectionVariants}
-            initial="initial"
-            animate="animate"
-            className="scroll-mt-24 grid grid-cols-1 gap-8 lg:gap-10 items-start max-w-5xl mx-auto w-full"
-          >
-            {/* Left: Data Sources */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-                className="flex items-center gap-3 mb-8"
-              >
-                <div className="font-display w-10 h-10 rounded-2xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center text-sm font-semibold text-blue-300">
-                  1
-                </div>
-                <div>
-                  <h2 className="font-display text-lg font-semibold tracking-tight leading-tight">Connect your accounts</h2>
-                  <p className="tracking-ui text-xs text-white/40 mt-0.5">Start with one. Add more whenever you want.</p>
-                </div>
-                <motion.div
-                  animate={{ scale: [1, 1.02, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="ml-auto flex items-center gap-1.5 text-xs text-white/40 shrink-0 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.04]"
-                >
-                  <span className="font-semibold text-white/80">{connectedCount}</span>
-                  <span className="text-white/20">/</span>
-                  <span>{totalSources}</span>
-                  <TrendingUp className="w-4 h-4 text-emerald-400/70" />
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                variants={{ animate: { transition: { staggerChildren: 0.05 } } }}
-                initial="initial"
-                animate="animate"
-                className="space-y-6"
-              >
-                {/* Connected Sources (PRD #10) */}
-                {identities.length > 0 && (
-                  <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <div className="flex items-center gap-2.5 mb-4">
-                      <motion.span
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.1 }}
-                        className="w-2.5 h-2.5 rounded-full bg-emerald-400"
-                      />
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-white/45">Connected sources</span>
-                      <span className="ml-auto text-[11px] text-white/25">{identities.length} connected</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {identities.map((id) => {
-                        const src = DATA_SOURCES.find((s) => s.id === id.source);
-                        return (
-                          <motion.span
-                            key={id.source}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/[0.06] border border-emerald-500/20 text-xs text-emerald-300"
-                          >
-                            {src && <BrandIcon id={src.icon} size={12} />}
-                            {id.source}
-                            <CheckCircle className="w-3 h-3 text-emerald-400" />
-                          </motion.span>
-                        );
-                      })}
-                    </div>
-                    <div className="mt-3 flex items-center gap-2 text-xs text-white/35">
-                      <CheckCircle className="w-3.5 h-3.5 text-emerald-400/70" />
-                      Accepted — each source contributes to your Nodea Score.
-                    </div>
-                  </motion.section>
-                )}
-
-                {/* Web Sources */}
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <div className="flex items-center gap-2.5 mb-4">
-                    <motion.span
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      className="w-2.5 h-2.5 rounded-full bg-emerald-400"
-                    />
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-white/45">Instant Connect</span>
-                    <span className="ml-auto text-[11px] text-white/25">
-                      {webSources.filter((s) => onboardedSources.has(s.id)).length}/{webSources.length}
-                    </span>
-                  </div>
-                  <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-                    variants={{ animate: { transition: { staggerChildren: 0.06 } } }}
-                  >
-                    {webSources.map((source, i) => (
-                      <motion.div key={source.id} variants={cardVariants} custom={i}>
-                        {renderSourceCard(source, i)}
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </motion.section>
-
-                {/* Desktop Sources */}
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  <div className="flex items-center gap-2.5 mb-4 flex-wrap">
-                    <motion.span
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-                      className="w-2.5 h-2.5 rounded-full bg-orange-400"
-                    />
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-white/45">Deep Data</span>
-                    <span className="ml-auto text-[11px] text-white/25">
-                      {desktopSources.filter((s) => onboardedSources.has(s.id)).length}/{desktopSources.length}
-                    </span>
-                    {!isDesktop && (
-                      <span className="text-[10px] text-white/30 font-normal hidden sm:inline flex items-center gap-1">
-                        <Monitor className="w-3 h-3" />
-                        Install on computer
-                      </span>
-                    )}
-                  </div>
-                  <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-                    variants={{ animate: { transition: { staggerChildren: 0.06 } } }}
-                  >
-                    {desktopSources.map((source, i) => (
-                      <motion.div key={source.id} variants={cardVariants} custom={i}>
-                        {renderSourceCard(source, i)}
-                      </motion.div>
-                    ))}
-                    {!isDesktop && (
-                      <motion.div
-                        variants={cardVariants}
-                        className="md:col-span-2 flex items-center gap-3 rounded-xl border border-dashed border-white/[0.07] bg-white/[0.01] px-4 py-3"
-                      >
-                        <div className="p-2 rounded-lg bg-orange-500/15 shrink-0">
-                          <Monitor className="w-4 h-4 text-orange-400" />
-                        </div>
-                        <p className="text-xs text-white/50 leading-snug">
-                          <span className="font-medium text-white/80">Deep data</span> — Steam, ChatGPT, watch
-                          history. Install <span className="text-orange-300/90 font-medium">Vana Desktop</span>,
-                          connect, then hit Connect here.
-                        </p>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                </motion.section>
-              </motion.div>
-
-              {/* Left panel close */}
-            </motion.div>
-            {/* Grid close */}
-          </motion.div>
-          </div>
-        )}
+          {/* Tab Connect dihapus — koneksi full via card home */}
 
           {view === "home" && (
             <>
@@ -3692,23 +3278,16 @@ export default function PageClient({
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           aria-label="Primary"
         >
-          <div className={`mx-auto max-w-lg grid ${variant === "app" ? "grid-cols-4" : variant === "connect" ? "grid-cols-2" : "grid-cols-3"}`}>
+          <div className={`mx-auto max-w-lg grid ${variant === "app" ? "grid-cols-3" : "grid-cols-2"}`}>
             {(variant === "landing"
               ? [
                   { v: "home", label: "Home", icon: Home },
-                  { v: "connect", label: "Connect", icon: Plus },
                   { v: "standings", label: "Standings", icon: Trophy },
-                ]
-              : variant === "connect"
-              ? [
-                  { v: "home", label: "Home", icon: Home },
-                  { v: "connect", label: "Connect", icon: Plus },
                 ]
               : [
                   { v: "card", label: "Overview", icon: CreditCard },
                   { v: "identity", label: "Identity", icon: Users },
                   { v: "insights", label: "Insights", icon: Sparkles },
-                  { v: "connect", label: "Add source", icon: Plus },
                 ]
             ).map((t) => {
               const active = view === t.v;
