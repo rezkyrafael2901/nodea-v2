@@ -940,47 +940,8 @@ export default function PageClient({
                 </span>
               )}
             </motion.h3>
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-[11px] text-white/45 truncate transition-colors duration-300 group-hover:text-white/60 mt-0.5"
-            >
-              {source.description}
-            </motion.p>
           </div>
         </div>
-
-        {disabledOnMobile && source.findIt && (
-          <motion.p
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="mt-2.5 text-[11px] text-white/35 leading-relaxed line-clamp-2"
-          >
-            {source.findIt.join(" ")}
-          </motion.p>
-        )}
-
-        {isHybrid && isDesktop && !isConnected && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-2.5 text-[11px] text-white/35 leading-relaxed"
-          >
-            <span className="text-yellow-400/70 font-medium">Profile</span> works anywhere.{" "}
-            <span className="text-blue-300/70 font-medium">Deep</span> pulls watch history, likes &
-            subscriptions — connect it in Vana Desktop first for full data.
-          </motion.div>
-        )}
-
-        {hasError && (
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-2.5 text-[11px] text-amber-400/80 leading-relaxed"
-          >
-            Connection failed. Try again or cancel.
-          </motion.p>
-        )}
 
         <div className="mt-auto pt-3">
           {isConnected ? (
