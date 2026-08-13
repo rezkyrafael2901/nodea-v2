@@ -3,7 +3,7 @@
 /**
  * IdentityResult — the clean, editorial "result" output (Pathfit-style).
  *
- * Design intent: mirror Pathfit's calm, plain, editorial result page —
+ * Design intent: follows Pathfit's calm, plain, editorial result page —
  * kicker → archetype → serif tagline → plain rationale → "Also worth
  * considering" list — but keep Nodea's dark brand identity (no grayscale
  * reskin, no emoji clutter, no strength bars, no gradients in the result body).

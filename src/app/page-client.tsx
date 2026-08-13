@@ -170,7 +170,7 @@ export default function PageClient({
       : initialView === "settings"
         ? "Settings"
         : initialView === "card" || initialView === "identity" || initialView === "insights"
-          ? "Mirror"
+          ? "Reflection"
           : "Home"
   );
   const [onboardedSources, setOnboardedSources] = useState<Set<string>>(new Set());
@@ -263,7 +263,7 @@ export default function PageClient({
     // the header itself (sub-tabs, CTAs, initial view). Anchor clicks from the
     // header keep their own label via handleNav and are intentionally left alone.
     if (v === "card" || v === "identity" || v === "insights") {
-      setActiveNav("Mirror");
+      setActiveNav("Reflection");
     } else if (v === "standings") {
       setActiveNav("Standings");
     } else if (v === "home" && !anchor) {
@@ -366,7 +366,7 @@ export default function PageClient({
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Restore persisted connections on mount so a refresh doesn't wipe the mirror.
+  // Restore persisted connections on mount so a refresh doesn't wipe the reflection.
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -395,7 +395,7 @@ export default function PageClient({
   };
   useEffect(() => { persistIdentities(identities); }, [identities]);
 
-  // Remove a source from the mirror — data, score, and persisted state.
+  // Remove a source from the reflection — data, score, and persisted state.
   const disconnectSource = useCallback((sourceId: string) => {
     setOnboardedSources((prev) => {
       const next = new Set(prev);
@@ -558,7 +558,7 @@ export default function PageClient({
         setActiveMode("web");
         setActiveRequestId(null);
         setStatusMessage("");
-        // Land the user on their Mirror so the research result is the payoff.
+        // Land the user on their Reflection so the research result is the payoff.
         goView("card");
       }, 1600);
     } catch (err) {
@@ -931,7 +931,7 @@ export default function PageClient({
               whileTap={reducedMotion ? {} : { scale: 0.95 }}
               onClick={() => disconnectSource(source.id)}
               className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 transition-colors"
-              title={`Disconnect ${source.name} — remove its data from your mirror`}
+              title={`Disconnect ${source.name} — remove its data from your reflection`}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </motion.button>
@@ -1103,9 +1103,9 @@ export default function PageClient({
   const gradeColor = GRADE_COLORS[displayGrade] || GRADE_COLORS.D;
   const gradeLabel = GRADE_LABELS[displayGrade] || GRADE_LABELS.D;
 
-  // ── Your Mirror preview — deterministic example built from the same mock
+  // ── Your Reflection preview — deterministic example built from the same mock
   //    data the engine uses in dev, so first-time visitors see a real card. ──
-  const mirror = useMemo(() => {
+  const reflection = useMemo(() => {
     const picks = ["github", "spotify", "instagram"] as const;
     const ids: IdentityData[] = picks.map((sid) => {
       const data = mockData(sid);
@@ -1191,7 +1191,7 @@ export default function PageClient({
               <nav className="hidden md:flex items-center gap-1">
                 {([
                   { v: "home", label: "Home" },
-                  { v: "card", label: "Mirror" },
+                  { v: "card", label: "Reflection" },
                   { v: "home", label: "How it works", anchor: "how" },
                   { v: "home", label: "Privacy", anchor: "privacy" },
                   { v: "standings", label: "Standings" },
@@ -1256,7 +1256,7 @@ export default function PageClient({
                   <div className="py-3 space-y-1 border-t border-[#94A3B8]/10 bg-[#0B1222]/95">
                     {([
                       { v: "home", label: "Home" },
-                      { v: "card", label: "Mirror" },
+                      { v: "card", label: "Reflection" },
                       { v: "home", label: "How it works", anchor: "how" },
                       { v: "home", label: "Privacy", anchor: "privacy" },
                       { v: "standings", label: "Standings" },
@@ -1309,7 +1309,7 @@ export default function PageClient({
                   transition={{ delay: 0.15, duration: 0.6, ease: easeOut }}
                   className="font-mono text-xs md:text-sm uppercase tracking-[0.18em] text-cyan-300/90 mb-5"
                 >
-                  Your data. Your mirror.
+                  Your data. Your reflection.
                 </motion.div>
                 <motion.h1
                   initial={{ opacity: 0, y: 30 }}
@@ -1330,7 +1330,7 @@ export default function PageClient({
                   Connect the accounts you already own. Nodea reads your real
                   activity — then shows you the{" "}
                   <span className="text-white/85">person behind it</span>. Not a quiz,
-                  a mirror.
+                  a reflection.
                 </motion.p>
 
                 {/* CTA row */}
@@ -1368,7 +1368,7 @@ export default function PageClient({
                 </motion.p>
               </div>
 
-              {/* Right: identity card — the star (built from demo mirror, same engine as real card) */}
+              {/* Right: identity card — the star (built from demo reflection, same engine as real card) */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.94, y: 24 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1386,7 +1386,7 @@ export default function PageClient({
                   />
                   <div className="relative flex items-center justify-between mb-6">
                     <span className="font-mono text-[11px] text-white/40 tracking-wider">
-                      nodea.app / your mirror
+                      nodea.app / your reflection
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
                       ● Live
@@ -1405,40 +1405,40 @@ export default function PageClient({
                     >
                       <div className="w-[82px] h-[82px] rounded-full bg-[#0F172A] border border-white/[0.06] grid place-items-center">
                         <span className="font-display font-semibold text-3xl tracking-tighter text-white">
-                          {mirror.score.total}
+                          {reflection.score.total}
                         </span>
                       </div>
                     </div>
                     <div className="min-w-0">
                       <div className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300 mb-1">
-                        Grade {mirror.score.grade} — {gradeLabel}
+                        Grade {reflection.score.grade} — {gradeLabel}
                       </div>
                       <div className="font-display text-xl font-semibold tracking-tight text-white leading-tight">
-                        {mirror.card ? mirror.card.primaryArchetype.title : "Your mirror, forming"}
+                        {reflection.card ? reflection.card.primaryArchetype.title : "Your reflection, forming"}
                       </div>
                       <div className="mt-1 text-[13px] text-white/45 leading-relaxed">
-                        {mirror.score.verdict}
+                        {reflection.score.verdict}
                       </div>
                     </div>
                   </div>
 
                   {/* trait statement */}
-                  {mirror.card && (
+                  {reflection.card && (
                     <div className="relative border-t border-white/[0.08] pt-5">
                       <div className="text-[26px] leading-none mb-2">
-                        {mirror.card.primaryArchetype.emoji}
+                        {reflection.card.primaryArchetype.emoji}
                       </div>
                       <div className="font-display text-lg font-semibold tracking-tight text-white mb-1.5">
-                        {mirror.card.primaryArchetype.tagline}
+                        {reflection.card.primaryArchetype.tagline}
                       </div>
                       <p className="text-[13.5px] text-white/50 leading-relaxed">
-                        {mirror.card.primaryArchetype.fitRationale}
+                        {reflection.card.primaryArchetype.fitRationale}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <span className="inline-flex items-center rounded-lg border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-[11px] font-medium text-blue-300">
                           3 / 7 Connected
                         </span>
-                        {mirror.card.alternatives.slice(0, 2).map((a) => (
+                        {reflection.card.alternatives.slice(0, 2).map((a) => (
                           <span
                             key={a.title}
                             className="inline-flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[11px] font-medium text-white/50"
@@ -1456,10 +1456,10 @@ export default function PageClient({
             </div>
           </motion.section>
 
-          {/* ── Your Mirror — example preview (built from the same engine that
+          {/* ── Your Reflection — example preview (built from the same engine that
               powers your real card, shown before you connect anything) ── */}
           <motion.section
-            id="mirror-preview"
+            id="reflection-preview"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
@@ -1506,7 +1506,7 @@ export default function PageClient({
                   boxShadow: "0 0 20px -4px rgba(79,140,255,0.5)",
                 }}
               >
-                Build your real mirror
+                Build your real reflection
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
             </div>
@@ -1837,8 +1837,8 @@ export default function PageClient({
                   <motion.div className="p-4 rounded-xl border border-white/[0.06] bg-white/[0.01]">
                     <h3 className="text-xs font-semibold text-white/50 mb-2">Delete or revoke</h3>
                     <ul className="space-y-1 text-xs text-white/45">
-                      <li>Disconnect any source anytime — its data leaves your mirror immediately.</li>
-                      <li>Clear localStorage ("Forget my mirror") to wipe the score.</li>
+                      <li>Disconnect any source anytime — its data leaves your reflection immediately.</li>
+                      <li>Clear localStorage ("Forget my reflection") to wipe the score.</li>
                       <li>Revoke the Vana OAuth grant from your account to remove access at the source.</li>
                     </ul>
                   </motion.div>
@@ -1879,7 +1879,7 @@ export default function PageClient({
                     },
                     {
                       q: "Can I delete my data?",
-                      a: "Yes. Disconnect any source, or clear browser storage with 'Forget my mirror' — your data, your control.",
+                      a: "Yes. Disconnect any source, or clear browser storage with 'Forget my reflection' — your data, your control.",
                     },
                     {
                       q: "Why does some data require Vana Desktop?",
@@ -1950,7 +1950,7 @@ export default function PageClient({
                       boxShadow: "0 0 20px -4px rgba(79,140,255,0.5)",
                     }}
                   >
-                    Build your real mirror
+                    Build your real reflection
                     <ArrowRight className="w-4 h-4" />
                   </motion.button>
                 </div>
@@ -2081,7 +2081,7 @@ export default function PageClient({
                 </p>
               </motion.div>
 
-              {/* In-Mirror sub-nav (kept out of the global header on purpose) */}
+              {/* In-Reflection sub-nav (kept out of the global header on purpose) */}
               <div className="flex items-center justify-center gap-2 mb-8">
                 {([
                   { v: "card", label: "Overview" },
@@ -2208,7 +2208,7 @@ export default function PageClient({
                     {generating
                       ? "Generating…"
                       : identities.length > 0
-                      ? `Generate Your Mirror${identities.length > 1 ? ` (${identities.length} sources)` : ""}`
+                      ? `Generate Your Reflection${identities.length > 1 ? ` (${identities.length} sources)` : ""}`
                       : "Connect at least one source"}
                   </span>
                 </motion.button>
@@ -2218,7 +2218,7 @@ export default function PageClient({
                   transition={{ delay: 0.5 }}
                   className="text-center text-[11px] text-white/25 mt-3"
                 >
-                  Your mirror is generated from real connected data — no questionnaire.
+                  Your reflection is generated from real connected data — no questionnaire.
                 </motion.p>
               </motion.div>
 
@@ -2546,7 +2546,7 @@ export default function PageClient({
               </p>
             </motion.div>
 
-            {/* In-Mirror sub-nav */}
+            {/* In-Reflection sub-nav */}
             <div className="flex items-center justify-center gap-2 mb-8">
               {([
                 { v: "card", label: "Overview" },
@@ -2651,7 +2651,7 @@ export default function PageClient({
               </p>
             </motion.div>
 
-            {/* In-Mirror sub-nav */}
+            {/* In-Reflection sub-nav */}
             <div className="flex items-center justify-center gap-2 mb-8">
               {([
                 { v: "card", label: "Overview" },
@@ -2830,7 +2830,7 @@ export default function PageClient({
                 className="p-6 rounded-2xl border border-red-500/20 bg-red-500/[0.03]"
               >
                 <h3 className="text-sm font-semibold text-red-300/80 flex items-center gap-2 mb-2">
-                  <Trash2 className="w-4 h-4" /> Forget my mirror
+                  <Trash2 className="w-4 h-4" /> Forget my reflection
                 </h3>
                 <p className="text-xs text-white/40 mb-4">
                   Wipe locally stored identity, score and connection state. This cannot be undone.
@@ -2972,7 +2972,7 @@ export default function PageClient({
                   Every day, you leave a trail — the songs you replay, the code you push,
                   the photos you post, the games you finish, the videos you binge. On their
                   own, each trace looks small. Together, they form something remarkable:{" "}
-                  <strong className="text-white font-semibold">an honest mirror of who you really are</strong>.
+                  <strong className="text-white font-semibold">an honest reflection of who you really are</strong>.
                   More honest than any resume. More honest than any bio. More honest than the
                   version of yourself you carefully craft for the world.
                 </p>
@@ -3066,7 +3066,7 @@ export default function PageClient({
                 <p className="mt-3 text-[15px] text-white/55 leading-relaxed">
                   Every like, scroll and purchase gets analyzed — by platforms, ad networks,
                   researchers. They often know your habits better than your closest friends.
-                  The only one missing from that conversation is you. Nodea puts the mirror
+                  The only one missing from that conversation is you. Nodea puts the reflection
                   back in your hands.
                 </p>
                 <blockquote className="border-l-2 border-cyan-400/50 pl-3 my-1 text-white/60 italic text-sm mt-4">
