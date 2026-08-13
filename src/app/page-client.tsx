@@ -1181,8 +1181,10 @@ export default function PageClient({
         />
       </motion.div>
 
-      {/* ── Floating Particles ── */}
+      {/* ── Global Background: constellation + floating particles (all views) ── */}
       <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
+        {/* Data constellation — full-viewport, behind everything */}
+        <DataConstellation className="absolute inset-0 h-full w-full opacity-60" />
         {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}
@@ -1335,8 +1337,6 @@ export default function PageClient({
             animate="animate"
             className="relative mb-20 md:mb-28 pt-16 md:pt-24"
           >
-            {/* Constellation background (hero only) */}
-            <DataConstellation className="absolute inset-0 -z-10 h-full w-full opacity-70" />
             <div className="grid lg:grid-cols-2 gap-14 md:gap-16 items-center max-w-6xl mx-auto text-left">
               {/* Left: copy + CTA */}
               <div>
