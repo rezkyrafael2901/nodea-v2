@@ -883,7 +883,7 @@ export default function PageClient({
     const connectLabel = isDesktopOnly ? "full" : "web";
 
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="flex w-full items-center justify-end gap-1.5">
         {isConnected ? (
           <div className="flex items-center gap-1.5">
             <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs font-medium text-emerald-300">
