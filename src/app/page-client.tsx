@@ -1184,7 +1184,7 @@ export default function PageClient({
       {/* ── Global Background: constellation + floating particles (all views) ── */}
       <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
         {/* Data constellation — full-viewport, behind everything */}
-        <DataConstellation className="absolute inset-0 h-full w-full opacity-60" />
+        <DataConstellation className="absolute inset-0 h-full w-full opacity-85" />
         {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}

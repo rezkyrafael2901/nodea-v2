@@ -14,8 +14,8 @@ import { useEffect, useRef } from "react";
  */
 export default function DataConstellation({
   className = "",
-  count = 70,
-  linkDistance = 110,
+  count = 110,
+  linkDistance = 140,
 }: {
   className?: string;
   count?: number;
@@ -41,6 +41,12 @@ export default function DataConstellation({
       const rect = canvas.getBoundingClientRect();
       w = rect.width;
       h = rect.height;
+      if (w < 2 || h < 2) {
+        // layout not ready yet — retry on next frame
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(resize);
+        return;
+      }
       canvas.width = Math.max(1, Math.round(w * dpr));
       canvas.height = Math.max(1, Math.round(h * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -52,8 +58,8 @@ export default function DataConstellation({
       y: Math.random(),
       vx: (Math.random() - 0.5) * 0.0014,
       vy: (Math.random() - 0.5) * 0.0014,
-      r: Math.random() * 1.5 + 0.7,
-      bright: Math.random() > 0.82,
+      r: Math.random() * 1.6 + 1.2,
+      bright: Math.random() > 0.8,
     }));
 
     const draw = (dt: number) => {
@@ -78,8 +84,8 @@ export default function DataConstellation({
           const dy = (a.y - b.y) * h;
           const dist = Math.hypot(dx, dy);
           if (dist < linkDistance) {
-            ctx.strokeStyle = `rgba(79,140,255,${(1 - dist / linkDistance) * 0.22})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(79,140,255,${(1 - dist / linkDistance) * 0.35})`;
+            ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(a.x * w, a.y * h);
             ctx.lineTo(b.x * w, b.y * h);
@@ -92,8 +98,8 @@ export default function DataConstellation({
       for (const p of particles) {
         ctx.beginPath();
         ctx.fillStyle = p.bright
-          ? "rgba(0,212,255,0.85)"
-          : "rgba(79,140,255,0.6)";
+          ? "rgba(0,212,255,1)"
+          : "rgba(79,140,255,0.85)";
         ctx.arc(p.x * w, p.y * h, p.r, 0, Math.PI * 2);
         ctx.fill();
       }
@@ -119,12 +125,20 @@ export default function DataConstellation({
     window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", onVisibility);
 
+    // re-measure if container size changes (orientation, sidebar, etc.)
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => resize());
+      ro.observe(canvas.parentElement ?? canvas);
+    }
+
     // always animate — decorative ambient (brand motion)
     last = performance.now();
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
+      ro?.disconnect();
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
     };
