@@ -1159,18 +1159,18 @@ export default function PageClient({
               {/* Center nav (desktop) — same set on every tab */}
               <nav className="hidden md:flex items-center gap-1">
                 {([
-                  { v: "home", label: "Home" },
-                  { v: "card", label: "Mirror" },
-                  { v: "standings", label: "Standings" },
-                  { v: "home", label: "How it works", anchor: "how" },
-                  { v: "home", label: "Privacy", anchor: "privacy" },
-                  { v: "home", label: "FAQ", anchor: "faq" },
-                ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
+                  { v: "home", label: "Home", activeOn: "home" },
+                  { v: "card", label: "Mirror", activeOn: "card" },
+                  { v: "standings", label: "Standings", activeOn: "standings" },
+                  { v: "home", label: "How it works", anchor: "how", activeOn: null },
+                  { v: "home", label: "Privacy", anchor: "privacy", activeOn: null },
+                  { v: "home", label: "FAQ", anchor: "faq", activeOn: null },
+                ] as const).map((item: { v: ViewKey; label: string; anchor?: string; activeOn?: ViewKey | null }) => (
                   <button
                     key={item.label}
                     onClick={() => goView(item.v as ViewKey, item.anchor)}
                     className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
-                      view === item.v
+                      item.activeOn !== undefined && view === item.activeOn
                         ? "text-[#38BDF8] bg-[#38BDF8]/10"
                         : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
                     }`}
@@ -1234,18 +1234,18 @@ export default function PageClient({
                 >
                   <div className="py-3 space-y-1 border-t border-[#94A3B8]/10 bg-[#0B1222]/95">
                     {([
-                      { v: "home", label: "Home" },
-                      { v: "card", label: "Mirror" },
-                      { v: "standings", label: "Standings" },
-                      { v: "home", label: "How it works", anchor: "how" },
-                      { v: "home", label: "Privacy", anchor: "privacy" },
-                      { v: "home", label: "FAQ", anchor: "faq" },
-                    ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
+                      { v: "home", label: "Home", activeOn: "home" },
+                      { v: "card", label: "Mirror", activeOn: "card" },
+                      { v: "standings", label: "Standings", activeOn: "standings" },
+                      { v: "home", label: "How it works", anchor: "how", activeOn: null },
+                      { v: "home", label: "Privacy", anchor: "privacy", activeOn: null },
+                      { v: "home", label: "FAQ", anchor: "faq", activeOn: null },
+                    ] as const).map((item: { v: ViewKey; label: string; anchor?: string; activeOn?: ViewKey | null }) => (
                       <button
                         key={item.label}
                         onClick={() => goView(item.v as ViewKey, item.anchor)}
                         className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                          view === item.v
+                          item.activeOn !== undefined && view === item.activeOn
                             ? "text-[#38BDF8] bg-[#38BDF8]/10"
                             : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
                         }`}
