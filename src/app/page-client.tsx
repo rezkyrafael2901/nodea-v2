@@ -167,9 +167,11 @@ export default function PageClient({
   const [activeNav, setActiveNav] = useState<string>(
     initialView === "standings"
       ? "Standings"
-      : initialView === "card" || initialView === "identity" || initialView === "insights"
-        ? "Mirror"
-        : "Home"
+      : initialView === "settings"
+        ? "Settings"
+        : initialView === "card" || initialView === "identity" || initialView === "insights"
+          ? "Mirror"
+          : "Home"
   );
   const [onboardedSources, setOnboardedSources] = useState<Set<string>>(new Set());
   const [identities, setIdentities] = useState<IdentityData[]>([]);
@@ -266,6 +268,8 @@ export default function PageClient({
       setActiveNav("Standings");
     } else if (v === "home" && !anchor) {
       setActiveNav("Home");
+    } else if (v === "settings") {
+      setActiveNav("Settings");
     }
     setTimeout(() => {
       if (anchor) {
@@ -1188,10 +1192,10 @@ export default function PageClient({
                 {([
                   { v: "home", label: "Home" },
                   { v: "card", label: "Mirror" },
-                  { v: "standings", label: "Standings" },
                   { v: "home", label: "How it works", anchor: "how" },
                   { v: "home", label: "Privacy", anchor: "privacy" },
-                  { v: "home", label: "FAQ", anchor: "faq" },
+                  { v: "standings", label: "Standings" },
+                  { v: "settings", label: "Settings" },
                 ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
                   <button
                     key={item.label}
@@ -1228,16 +1232,6 @@ export default function PageClient({
                   Connect
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
-                <motion.button
-                  whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
-                  whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                  onClick={() => goView("settings")}
-                  className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#94A3B8] hover:text-white bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-colors"
-                  aria-label="Settings"
-                >
-                  <Settings className="w-4 h-4" />
-                  Settings
-                </motion.button>
                 {/* Mobile hamburger */}
                 <button
                   onClick={() => setNavOpen((v) => !v)}
@@ -1263,10 +1257,10 @@ export default function PageClient({
                     {([
                       { v: "home", label: "Home" },
                       { v: "card", label: "Mirror" },
-                      { v: "standings", label: "Standings" },
                       { v: "home", label: "How it works", anchor: "how" },
                       { v: "home", label: "Privacy", anchor: "privacy" },
-                      { v: "home", label: "FAQ", anchor: "faq" },
+                      { v: "standings", label: "Standings" },
+                      { v: "settings", label: "Settings" },
                     ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
                       <button
                         key={item.label}
@@ -1286,12 +1280,6 @@ export default function PageClient({
                       style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
                     >
                       Connect
-                    </button>
-                    <button
-                      onClick={() => goView("settings")}
-                      className="w-full px-3 py-3 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-white hover:bg-white/[0.04] transition-colors"
-                    >
-                      Settings
                     </button>
                   </div>
                 </motion.nav>
@@ -1546,7 +1534,7 @@ export default function PageClient({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-              {DATA_SOURCES.map((source) => {
+              {DATA_SOURCES.filter((s) => s.id !== "chatgpt").map((source) => {
                 return (
                   <motion.div
                     key={source.id}
@@ -1614,7 +1602,7 @@ export default function PageClient({
             </div>
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { icon: Layers, title: "Multi-source", desc: "Seven real platforms, one unified picture built from live activity." },
+                { icon: Layers, title: "Multi-source", desc: "Six real platforms, one unified picture built from live activity." },
                 { icon: Lock, title: "Private by design", desc: "You approve exactly what we read, and you can revoke anytime." },
                 { icon: Share2, title: "Portable", desc: "One card you can share, compare and keep across every device." },
               ].map((f) => (
