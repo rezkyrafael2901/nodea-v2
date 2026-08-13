@@ -29,7 +29,7 @@ export default function DataConstellation({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // NOTE: decorative ambient — always animates (brand motion).
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     let raf = 0;
@@ -50,8 +50,8 @@ export default function DataConstellation({
     const particles = Array.from({ length: count }, () => ({
       x: Math.random(),
       y: Math.random(),
-      vx: (Math.random() - 0.5) * 0.00035,
-      vy: (Math.random() - 0.5) * 0.00035,
+      vx: (Math.random() - 0.5) * 0.0014,
+      vy: (Math.random() - 0.5) * 0.0014,
       r: Math.random() * 1.5 + 0.7,
       bright: Math.random() > 0.82,
     }));
@@ -119,13 +119,9 @@ export default function DataConstellation({
     window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", onVisibility);
 
-    if (reduced) {
-      // static single frame — no loop
-      draw(0);
-    } else if (running) {
-      last = performance.now();
-      raf = requestAnimationFrame(tick);
-    }
+    // always animate — decorative ambient (brand motion)
+    last = performance.now();
+    raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
