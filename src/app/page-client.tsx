@@ -246,6 +246,15 @@ export default function PageClient({
         : v === "settings"
         ? "/settings"
         : "/";
+      // App routes (and settings) render the app nav; the landing routes render the
+      // landing nav. When the target route belongs to a different header variant,
+      // do a full navigation so the server renders the correct variant — persisted
+      // connections are restored from localStorage on mount.
+      const targetVariant: PageVariant = route === "/" ? "landing" : "app";
+      if (targetVariant !== variant) {
+        window.location.href = route;
+        return;
+      }
       if (window.location.pathname !== route) window.history.pushState({}, "", route);
     }
     setTimeout(() => {
@@ -256,7 +265,7 @@ export default function PageClient({
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     }, 80);
-  }, []);
+  }, [variant]);
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -525,7 +534,9 @@ export default function PageClient({
         setActiveMode("web");
         setActiveRequestId(null);
         setStatusMessage("");
-      }, 2000);
+        // Land the user on their Mirror so the research result is the payoff.
+        goView("card");
+      }, 1600);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to fetch data";
       if (/payment|escrow|insufficient|balance|402/i.test(msg)) {
@@ -669,7 +680,8 @@ export default function PageClient({
             setActiveSource(null);
             setActiveMode("web");
             setStatusMessage("");
-          }, 2000);
+            goView("card");
+          }, 1600);
           return;
         }
         throw new Error(data.error);
@@ -1156,6 +1168,7 @@ export default function PageClient({
                 <nav className="hidden md:flex items-center gap-1">
                   {([
                     { v: "home", label: "Home" },
+                    { v: "card", label: "Mirror" },
                     { v: "standings", label: "Standings" },
                     { v: "home", label: "How it works", anchor: "how" },
                     { v: "home", label: "Privacy", anchor: "privacy" },
@@ -1178,6 +1191,7 @@ export default function PageClient({
               {variant === "app" && (
                 <nav className="hidden md:flex items-center gap-1">
                   {([
+                    { v: "home", label: "Home" },
                     { v: "card", label: "Overview" },
                     { v: "identity", label: "Identity" },
                     { v: "insights", label: "Insights" },
@@ -1258,6 +1272,7 @@ export default function PageClient({
                     {variant === "landing" &&
                       ([
                         { v: "home", label: "Home" },
+                        { v: "card", label: "Mirror" },
                         { v: "standings", label: "Standings" },
                         { v: "home", label: "How it works", anchor: "how" },
                         { v: "home", label: "Privacy", anchor: "privacy" },
@@ -1277,6 +1292,7 @@ export default function PageClient({
                       ))}
                     {variant === "app" &&
                       ([
+                        { v: "home", label: "Home" },
                         { v: "card", label: "Overview" },
                         { v: "identity", label: "Identity" },
                         { v: "insights", label: "Insights" },
