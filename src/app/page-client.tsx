@@ -906,7 +906,7 @@ export default function PageClient({
         animate="animate"
         whileHover={reducedMotion ? {} : "hover"}
         whileTap={reducedMotion ? {} : "tap"}
-        className={`group relative flex h-full flex-col rounded-xl border p-4 transition-all duration-300 ease-out ${
+        className={`group relative flex items-center gap-3 rounded-xl border px-3.5 py-2.5 min-h-[72px] transition-all duration-300 ease-out ${
           highlightSource === source.id
             ? "ring-2 ring-cyan-400/70 border-cyan-400/40 shadow-[0_0_28px_-4px_rgba(0,212,255,0.45)]"
             : ""
@@ -914,86 +914,79 @@ export default function PageClient({
           isConnected
             ? "bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40"
             : disabledOnMobile
-            ? "bg-white/[0.01] border-white/[0.04] opacity-50"
+            ? "bg-white/[0.01] border-white/[0.04] opacity-60"
             : hasError
             ? "border-amber-500/30 bg-amber-500/[0.03] hover:border-amber-500/50"
             : "glass glass-border-hover hover:bg-white/[0.03]"
         }`}
       >
-        <div className="flex items-start gap-3 min-w-0">
-          <motion.div
-            whileHover={reducedMotion ? {} : { scale: 1.1, rotate: -3 }}
-            className="shrink-0 transition-transform duration-300 ease-out"
+        <motion.div
+          whileHover={reducedMotion ? {} : { scale: 1.08, rotate: -3 }}
+          className="shrink-0 transition-transform duration-300 ease-out"
+        >
+          <BrandIconTile id={source.icon} size={40} />
+        </motion.div>
+
+        <div className="min-w-0 flex-1">
+          <motion.h3
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="font-medium text-white text-sm group-hover:text-white transition-colors duration-300 truncate"
           >
-            <BrandIconTile id={source.icon} size={36} />
-          </motion.div>
-          <div className="min-w-0 flex-1 pt-0.5">
-            <motion.h3
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="font-medium text-white text-sm group-hover:text-white transition-colors duration-300 truncate flex items-center gap-2"
-            >
-              {source.name}
-              {isConnected && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400 shrink-0">
-                  <Check className="w-3 h-3" /> Connected
-                </span>
-              )}
-            </motion.h3>
-          </div>
+            {source.name}
+          </motion.h3>
         </div>
 
-        <div className="mt-auto pt-3">
+        <div className="shrink-0">
           {isConnected ? (
-            <div className="flex items-center justify-between gap-2 text-[11px] text-emerald-400">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Zap className="w-3 h-3 shrink-0" />
-                <span className="truncate">Contributing to your Nodea Score</span>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs font-medium text-emerald-300">
+                <Check className="w-3.5 h-3.5" /> Connected
+              </span>
               <motion.button
                 type="button"
-                whileHover={reducedMotion ? {} : { scale: 1.04 }}
+                whileHover={reducedMotion ? {} : { scale: 1.05 }}
                 whileTap={reducedMotion ? {} : { scale: 0.95 }}
                 onClick={() => disconnectSource(source.id)}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/30 transition-colors shrink-0"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 transition-colors"
                 title={`Disconnect ${source.name} — remove its data from your mirror`}
               >
-                <Trash2 className="w-3 h-3" /> Disconnect
+                <Trash2 className="w-3.5 h-3.5" />
               </motion.button>
             </div>
           ) : (
-            <div className="flex items-center justify-end gap-1.5">
+            <div className="flex items-center gap-1.5">
               {disabledOnMobile ? (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] text-white/30 bg-white/[0.02] border border-white/[0.04]">
-                  <Monitor className="w-3 h-3" />
-                  <span>Desktop only</span>
+                <div className="inline-flex items-center justify-center h-8 px-3 rounded-lg text-[11px] text-white/35 bg-white/[0.02] border border-white/[0.06]">
+                  <Monitor className="w-3.5 h-3.5 mr-1.5" />
+                  Desktop only
                 </div>
               ) : isConnecting ? (
                 <>
-                  <span className="inline-flex items-center gap-1 rounded-lg border border-blue-500/25 bg-blue-500/10 px-2.5 py-1 text-[10px] font-medium text-blue-300">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    {connectState === "awaiting_approval" ? "Waiting for approval…" : "Connecting…"}
+                  <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-blue-500/25 bg-blue-500/10 text-[11px] font-medium text-blue-300">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    {connectState === "awaiting_approval" ? "Waiting…" : "Connecting…"}
                   </span>
                   <button
                     onClick={cancelConnect}
-                    className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-2.5 py-1 text-[10px] font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-red-500/30 text-[11px] font-medium text-red-400 hover:bg-red-500/10 transition-colors"
                   >
-                    <X className="w-3 h-3" /> Cancel
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </>
               ) : hasError ? (
                 <>
                   <button
                     onClick={() => openLinkCheck(source, connectLabel)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 px-2.5 py-1 text-[10px] font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
+                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-500/30 text-[11px] font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
                   >
-                    <RotateCcw className="w-3 h-3" /> Try again
+                    <RotateCcw className="w-3.5 h-3.5" /> Retry
                   </button>
                   <button
                     onClick={cancelConnect}
-                    className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2.5 py-1 text-[10px] font-medium text-white/50 hover:bg-white/5 transition-colors"
+                    className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-white/10 text-[11px] font-medium text-white/50 hover:bg-white/5 transition-colors"
                   >
-                    <X className="w-3 h-3" /> Cancel
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </>
               ) : isHybrid && isDesktop && !isConnected ? (
@@ -1001,7 +994,7 @@ export default function PageClient({
                   <button
                     onClick={() => openLinkCheck(source, "web")}
                     disabled={isDisabled}
-                    className="inline-flex items-center justify-center min-h-[30px] px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium transition-colors"
+                    className="inline-flex items-center justify-center h-8 px-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium transition-colors"
                     title="Profile only — works anywhere"
                   >
                     Profile
@@ -1009,7 +1002,7 @@ export default function PageClient({
                   <button
                     onClick={() => openLinkCheck(source, "full")}
                     disabled={isDisabled}
-                    className="inline-flex items-center justify-center min-h-[30px] px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 hover:border-blue-500/50 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium text-blue-200 transition-colors"
+                    className="inline-flex items-center justify-center h-8 px-3 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 hover:border-blue-500/50 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-[11px] font-medium text-blue-200 transition-colors"
                     title="Watch history, likes, subscriptions — needs Vana Desktop"
                   >
                     Deep
@@ -1019,10 +1012,10 @@ export default function PageClient({
                 <button
                   onClick={() => openLinkCheck(source, connectLabel)}
                   disabled={isDisabled}
-                  className={`inline-flex items-center justify-center min-h-[30px] gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`inline-flex items-center justify-center h-8 min-w-[88px] gap-1.5 px-3.5 rounded-lg text-xs font-semibold transition-all ${
                     hasError
                       ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
-                      : "border border-cyan-400/30 bg-cyan-400/[0.06] text-cyan-300 hover:bg-cyan-400/10 hover:border-cyan-400/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      : "bg-cyan-400 text-slate-950 hover:bg-cyan-300 shadow-[0_0_16px_-4px_rgba(34,211,238,0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
                   }`}
                 >
                   {isConnected ? (
@@ -1038,7 +1031,7 @@ export default function PageClient({
                   ) : (
                     <>
                       Connect
-                      <ArrowUpRight className="w-3 h-3 opacity-60" />
+                      <ArrowUpRight className="w-3.5 h-3.5" />
                     </>
                   )}
                 </button>
@@ -2048,23 +2041,16 @@ export default function PageClient({
                     {!isDesktop && (
                       <motion.div
                         variants={cardVariants}
-                        className="md:col-span-2 p-4 rounded-xl border border-dashed border-white/[0.06] bg-white/[0.01]"
+                        className="md:col-span-2 flex items-center gap-3 rounded-xl border border-dashed border-white/[0.07] bg-white/[0.01] px-4 py-3"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="p-1.5 rounded-lg bg-orange-500/15 shrink-0">
-                            <Monitor className="w-4 h-4 text-orange-400" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-white/80 mb-0.5 text-sm">Unlock Deep Data with Vana Desktop</p>
-                            <p className="text-white/40 text-xs leading-relaxed">
-                              Steam games & playtime, YouTube watch history, ChatGPT conversations, Spotify listening history.
-                              <br />
-                              <span className="text-white/30 mt-2 inline-block">
-                                Install Vana Desktop at vana.org/desktop → connect accounts → come back and hit Connect.
-                              </span>
-                            </p>
-                          </div>
+                        <div className="p-2 rounded-lg bg-orange-500/15 shrink-0">
+                          <Monitor className="w-4 h-4 text-orange-400" />
                         </div>
+                        <p className="text-xs text-white/50 leading-snug">
+                          <span className="font-medium text-white/80">Deep data</span> — Steam, ChatGPT, watch
+                          history. Install <span className="text-orange-300/90 font-medium">Vana Desktop</span>,
+                          connect, then hit Connect here.
+                        </p>
                       </motion.div>
                     )}
                   </motion.div>
