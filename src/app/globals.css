@@ -568,6 +568,41 @@
 }
 .animate-rotate-slow { animation: rotate-slow 20s linear infinite; }
 
+/* ── Aurora background drift (global ambient) ── */
+@keyframes aurora-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(80px, -50px) scale(1.15); }
+  66% { transform: translate(-50px, 40px) scale(0.92); }
+}
+@keyframes aurora-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(-70px, 60px) scale(1.1); }
+  75% { transform: translate(60px, -30px) scale(0.95); }
+}
+@keyframes aurora-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  30% { transform: translate(60px, 50px) scale(0.9); }
+  70% { transform: translate(-80px, -60px) scale(1.18); }
+}
+@keyframes aurora-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -80px) scale(1.12); }
+}
+.animate-aurora-1 { animation: aurora-1 26s ease-in-out infinite; will-change: transform; }
+.animate-aurora-2 { animation: aurora-2 32s ease-in-out infinite; will-change: transform; }
+.animate-aurora-3 { animation: aurora-3 38s ease-in-out infinite; will-change: transform; }
+.animate-aurora-4 { animation: aurora-4 24s ease-in-out infinite; will-change: transform; }
+
+/* ── Reduced motion: freeze ambient animation ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora-1,
+  .animate-aurora-2,
+  .animate-aurora-3,
+  .animate-aurora-4 {
+    animation: none;
+  }
+}
+
 /* Stagger delays */
 .stagger-1 { animation-delay: 50ms; }
 .stagger-2 { animation-delay: 100ms; }

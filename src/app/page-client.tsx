@@ -17,6 +17,7 @@ import InsightsPanel from "@/components/insights-panel";
 import IdentityResult from "@/components/identity-result";
 import { BrandIconTile, BrandIcon, type BrandId } from "@/components/brand-icons";
 import { AppLogo, AppWordmark } from "@/components/app-logo";
+import DataConstellation from "@/components/data-constellation";
 import {
   Plus,
   Check,
@@ -1162,15 +1163,16 @@ export default function PageClient({
       className="min-h-dvh bg-[var(--color-bg)] text-white relative overflow-x-hidden"
       style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
     >
-      {/* ── Animated Background ── */}
+      {/* ── Animated Background (Aurora drift) ── */}
       <motion.div
         className="pointer-events-none fixed inset-0 -z-10"
         animate={glowVariants}
         style={{ willChange: "transform, opacity" }}
       >
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-blue-600/8 blur-[150px]" />
-        <div className="absolute top-1/3 -left-60 w-[500px] h-[500px] rounded-full bg-cyan-600/5 blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] rounded-full bg-cyan-600/5 blur-[150px]" />
+        <div className="absolute -top-40 left-1/4 w-[800px] h-[500px] rounded-full bg-blue-600/15 blur-[150px] animate-aurora-1" />
+        <div className="absolute top-1/3 -left-60 w-[500px] h-[500px] rounded-full bg-cyan-600/10 blur-[120px] animate-aurora-2" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] rounded-full bg-cyan-600/10 blur-[150px] animate-aurora-3" />
+        <div className="absolute top-1/4 right-1/4 w-[420px] h-[420px] rounded-full bg-violet-600/10 blur-[140px] animate-aurora-4" />
         <div
           className="absolute top-0 left-0 w-full h-full"
           style={{
@@ -1333,6 +1335,8 @@ export default function PageClient({
             animate="animate"
             className="relative mb-20 md:mb-28 pt-16 md:pt-24"
           >
+            {/* Constellation background (hero only) */}
+            <DataConstellation className="absolute inset-0 -z-10 h-full w-full opacity-70" />
             <div className="grid lg:grid-cols-2 gap-14 md:gap-16 items-center max-w-6xl mx-auto text-left">
               {/* Left: copy + CTA */}
               <div>
