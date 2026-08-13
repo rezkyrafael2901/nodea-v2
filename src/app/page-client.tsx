@@ -246,15 +246,8 @@ export default function PageClient({
         : v === "settings"
         ? "/settings"
         : "/";
-      // App routes (and settings) render the app nav; the landing routes render the
-      // landing nav. When the target route belongs to a different header variant,
-      // do a full navigation so the server renders the correct variant — persisted
-      // connections are restored from localStorage on mount.
-      const targetVariant: PageVariant = route === "/" ? "landing" : "app";
-      if (targetVariant !== variant) {
-        window.location.href = route;
-        return;
-      }
+      // The header nav is now identical on every route, so SPA pushState is always safe —
+      // no full reload needed when switching tabs.
       if (window.location.pathname !== route) window.history.pushState({}, "", route);
     }
     setTimeout(() => {
@@ -1163,90 +1156,61 @@ export default function PageClient({
                 <span className="font-display text-lg font-semibold tracking-tight text-white leading-none">NODEA</span>
               </button>
 
-              {/* Center nav (desktop) */}
-              {variant === "landing" && (
-                <nav className="hidden md:flex items-center gap-1">
-                  {([
-                    { v: "home", label: "Home" },
-                    { v: "card", label: "Mirror" },
-                    { v: "standings", label: "Standings" },
-                    { v: "home", label: "How it works", anchor: "how" },
-                    { v: "home", label: "Privacy", anchor: "privacy" },
-                    { v: "home", label: "FAQ", anchor: "faq" },
-                  ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
-                    <button
-                      key={item.label}
-                      onClick={() => goView(item.v as ViewKey, item.anchor)}
-                      className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
-                        view === item.v
-                          ? "text-[#38BDF8] bg-[#38BDF8]/10"
-                          : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </nav>
-              )}
-              {variant === "app" && (
-                <nav className="hidden md:flex items-center gap-1">
-                  {([
-                    { v: "home", label: "Home" },
-                    { v: "card", label: "Overview" },
-                    { v: "identity", label: "Identity" },
-                    { v: "insights", label: "Insights" },
-                  ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
-                    <button
-                      key={item.label}
-                      onClick={() => goView(item.v as ViewKey, item.anchor)}
-                      className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
-                        view === item.v
-                          ? "text-[#38BDF8] bg-[#38BDF8]/10"
-                          : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </nav>
-              )}
-
-              {/* Right actions */}
-              <div className="flex items-center gap-3">
-                {variant === "landing" && (
-                  <>
-                    <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.07]">
-                      <span className="text-emerald-400 font-mono text-sm font-semibold">{connectedCount}</span>
-                      <span className="text-white/20">/</span>
-                      <span className="text-white/50 font-mono text-sm">{totalSources}</span>
-                      <span className="text-[9px] uppercase tracking-wider text-white/35 ml-0.5">connected</span>
-                    </div>
-                    <motion.button
-                      whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
-                      whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                      onClick={() => goView("connect")}
-                      className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
-                      style={{
-                        background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)",
-                        boxShadow: "0 2px 12px -4px rgba(59,130,246,0.5)",
-                      }}
-                    >
-                      Connect
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
-                  </>
-                )}
-                {variant === "app" && (
-                  <motion.button
-                    whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
-                    whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                    onClick={() => goView("settings")}
-                    className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#94A3B8] hover:text-white bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-colors"
+              {/* Center nav (desktop) — same set on every tab */}
+              <nav className="hidden md:flex items-center gap-1">
+                {([
+                  { v: "home", label: "Home" },
+                  { v: "card", label: "Mirror" },
+                  { v: "standings", label: "Standings" },
+                  { v: "home", label: "How it works", anchor: "how" },
+                  { v: "home", label: "Privacy", anchor: "privacy" },
+                  { v: "home", label: "FAQ", anchor: "faq" },
+                ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
+                  <button
+                    key={item.label}
+                    onClick={() => goView(item.v as ViewKey, item.anchor)}
+                    className={`px-3.5 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center transition-colors ${
+                      view === item.v
+                        ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                        : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                    }`}
                   >
-                    <Settings className="w-4 h-4" />
-                    Settings
-                  </motion.button>
-                )}
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Right actions — always visible on every tab */}
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.07]">
+                  <span className="text-emerald-400 font-mono text-sm font-semibold">{connectedCount}</span>
+                  <span className="text-white/20">/</span>
+                  <span className="text-white/50 font-mono text-sm">{totalSources}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-white/35 ml-0.5">connected</span>
+                </div>
+                <motion.button
+                  whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                  onClick={() => goView("connect")}
+                  className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
+                  style={{
+                    background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)",
+                    boxShadow: "0 2px 12px -4px rgba(59,130,246,0.5)",
+                  }}
+                >
+                  Connect
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+                <motion.button
+                  whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.97 }}
+                  onClick={() => goView("settings")}
+                  className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#94A3B8] hover:text-white bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-colors"
+                  aria-label="Settings"
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </motion.button>
                 {/* Mobile hamburger */}
                 <button
                   onClick={() => setNavOpen((v) => !v)}
@@ -1258,7 +1222,7 @@ export default function PageClient({
               </div>
             </div>
 
-            {/* Mobile dropdown */}
+            {/* Mobile dropdown — same set on every tab */}
             <AnimatePresence>
               {navOpen && (
                 <motion.nav
@@ -1269,65 +1233,39 @@ export default function PageClient({
                   className="md:hidden overflow-hidden"
                 >
                   <div className="py-3 space-y-1 border-t border-[#94A3B8]/10 bg-[#0B1222]/95">
-                    {variant === "landing" &&
-                      ([
-                        { v: "home", label: "Home" },
-                        { v: "card", label: "Mirror" },
-                        { v: "standings", label: "Standings" },
-                        { v: "home", label: "How it works", anchor: "how" },
-                        { v: "home", label: "Privacy", anchor: "privacy" },
-                        { v: "home", label: "FAQ", anchor: "faq" },
-                      ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
-                        <button
-                          key={item.label}
-                          onClick={() => goView(item.v as ViewKey, item.anchor)}
-                          className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                            view === item.v
-                              ? "text-[#38BDF8] bg-[#38BDF8]/10"
-                              : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    {variant === "app" &&
-                      ([
-                        { v: "home", label: "Home" },
-                        { v: "card", label: "Overview" },
-                        { v: "identity", label: "Identity" },
-                        { v: "insights", label: "Insights" },
-                      ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
-                        <button
-                          key={item.label}
-                          onClick={() => goView(item.v as ViewKey, item.anchor)}
-                          className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                            view === item.v
-                              ? "text-[#38BDF8] bg-[#38BDF8]/10"
-                              : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    {variant === "landing" && (
+                    {([
+                      { v: "home", label: "Home" },
+                      { v: "card", label: "Mirror" },
+                      { v: "standings", label: "Standings" },
+                      { v: "home", label: "How it works", anchor: "how" },
+                      { v: "home", label: "Privacy", anchor: "privacy" },
+                      { v: "home", label: "FAQ", anchor: "faq" },
+                    ] as const).map((item: { v: ViewKey; label: string; anchor?: string }) => (
                       <button
-                        onClick={() => goView("connect")}
-                        className="w-full mt-2 px-3 py-3 rounded-lg text-sm font-semibold text-white"
-                        style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                        key={item.label}
+                        onClick={() => goView(item.v as ViewKey, item.anchor)}
+                        className={`w-full text-left px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                          view === item.v
+                            ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                            : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                        }`}
                       >
-                        Connect
+                        {item.label}
                       </button>
-                    )}
-                    {variant === "app" && (
-                      <button
-                        onClick={() => {
-                          if (typeof window !== "undefined") window.location.href = "/settings";
-                        }}
-                        className="w-full mt-2 px-3 py-3 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-white hover:bg-white/[0.04] transition-colors"
-                      >
-                        Settings
-                      </button>
-                    )}
+                    ))}
+                    <button
+                      onClick={() => goView("connect")}
+                      className="w-full mt-2 px-3 py-3 rounded-lg text-sm font-semibold text-white"
+                      style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
+                    >
+                      Connect
+                    </button>
+                    <button
+                      onClick={() => goView("settings")}
+                      className="w-full px-3 py-3 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-white hover:bg-white/[0.04] transition-colors"
+                    >
+                      Settings
+                    </button>
                   </div>
                 </motion.nav>
               )}
@@ -2128,6 +2066,27 @@ export default function PageClient({
                 </p>
               </motion.div>
 
+              {/* In-Mirror sub-nav (kept out of the global header on purpose) */}
+              <div className="flex items-center justify-center gap-2 mb-8">
+                {([
+                  { v: "card", label: "Overview" },
+                  { v: "identity", label: "Identity" },
+                  { v: "insights", label: "Insights" },
+                ] as const).map((item: { v: ViewKey; label: string }) => (
+                  <button
+                    key={item.label}
+                    onClick={() => goView(item.v)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      view === item.v
+                        ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                        : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
               {/* Empty-state banner (PRD #35) */}
               {identities.length === 0 ? (
                 <motion.div
@@ -2572,6 +2531,27 @@ export default function PageClient({
               </p>
             </motion.div>
 
+            {/* In-Mirror sub-nav */}
+            <div className="flex items-center justify-center gap-2 mb-8">
+              {([
+                { v: "card", label: "Overview" },
+                { v: "identity", label: "Identity" },
+                { v: "insights", label: "Insights" },
+              ] as const).map((item: { v: ViewKey; label: string }) => (
+                <button
+                  key={item.label}
+                  onClick={() => goView(item.v)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    view === item.v
+                      ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                      : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
             {identities.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -2655,6 +2635,27 @@ export default function PageClient({
                 Structured observations about your digital identity — patterns, strengths and unique combinations.
               </p>
             </motion.div>
+
+            {/* In-Mirror sub-nav */}
+            <div className="flex items-center justify-center gap-2 mb-8">
+              {([
+                { v: "card", label: "Overview" },
+                { v: "identity", label: "Identity" },
+                { v: "insights", label: "Insights" },
+              ] as const).map((item: { v: ViewKey; label: string }) => (
+                <button
+                  key={item.label}
+                  onClick={() => goView(item.v)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    view === item.v
+                      ? "text-[#38BDF8] bg-[#38BDF8]/10"
+                      : "text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
 
             {identities.length === 0 ? (
               <motion.div
