@@ -1160,7 +1160,7 @@ export default function PageClient({
       initial="initial"
       animate="animate"
       variants={pageVariants}
-      className="min-h-dvh bg-[var(--color-bg)] text-white relative overflow-x-hidden"
+      className="min-h-dvh bg-[var(--color-bg)] text-white relative overflow-x-hidden isolate"
       style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
     >
       {/* ── Animated Background (Aurora drift) ── */}
