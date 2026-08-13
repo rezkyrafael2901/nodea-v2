@@ -214,6 +214,9 @@ export default function PageClient({
 
   const [refFrom, setRefFrom] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  // Mobile-friendly "Add a source" bottom sheet — dipakai untuk entry point
+  // connect di dalam dashboard (/app) supaya user gak dilempar ke landing.
+  const [connectSheetOpen, setConnectSheetOpen] = useState(false);
 
   // ── Tab-based navigation (Patina-style bottom nav) ──
   const [view, setView] = useState<ViewKey>(initialView);
@@ -280,6 +283,20 @@ export default function PageClient({
       }
     }, 80);
   }, [variant]);
+
+  // Connect entry-point dispatcher:
+  // - Di landing (view "home") tetap scroll ke source grid (#sources) — konteks
+  //   halaman utuh, semua section tetep kebaca.
+  // - Di dalam dashboard (/app, Reflection/Identity/Insights/Settings/Standings)
+  //   buka bottom sheet "Add a source" supaya user gak dilempar ke landing.
+  const openConnect = useCallback(() => {
+    if (view === "home") {
+      goView("connect");
+    } else {
+      setConnectSheetOpen(true);
+      setNavOpen(false);
+    }
+  }, [view, goView]);
 
   // Header nav click — the pressed tab always lights up, even anchor items
   // (How it works / Privacy / FAQ) which scroll inside the home page.
@@ -558,6 +575,7 @@ export default function PageClient({
         setActiveMode("web");
         setActiveRequestId(null);
         setStatusMessage("");
+        setConnectSheetOpen(false);
         // Land the user on their Reflection so the research result is the payoff.
         goView("card");
       }, 1600);
@@ -664,6 +682,20 @@ export default function PageClient({
     if (src) handleConnect(src, mode);
   };
 
+  const openVanaApproval = (url: string): Window | null => {
+    // Mobile browsers ignore popup window features (width/height) — a spaced
+    // popup turns into a blank tab. Open a plain "_blank" tab on touch/mobile
+    // so the Vana approval page actually renders; desktop keeps the popup so
+    // the polling loop stays in the main tab.
+    const isMobile =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(max-width: 768px)").matches ||
+        ("ontouchstart" in window && window.innerWidth < 1024));
+    return isMobile
+      ? window.open(url, "_blank")
+      : window.open(url, "vana-connect", "width=600,height=700,scrollbars=yes");
+  };
+
   const handleConnect = async (source: DataSource, mode: "web" | "full" = "web") => {
     if (connectState !== "idle" && connectState !== "error") return;
     if (source.platform === "desktop" && !isDesktop) return;
@@ -704,6 +736,7 @@ export default function PageClient({
             setActiveSource(null);
             setActiveMode("web");
             setStatusMessage("");
+            setConnectSheetOpen(false);
             goView("card");
           }, 1600);
           return;
@@ -716,7 +749,7 @@ export default function PageClient({
       setStatusMessage("Approve access in the new window...");
       savePending(data.requestId, source.id, mode);
 
-      const popup = window.open(data.approvalUrl, "vana-connect", "width=600,height=700,scrollbars=yes");
+      const popup = openVanaApproval(data.approvalUrl);
       if (!popup || popup.closed) {
         popupRef.current = null;
         setStatusMessage("Popup was blocked. Use the link below to approve in a new tab.");
@@ -742,7 +775,7 @@ export default function PageClient({
         .then((r) => r.json())
         .then((data) => {
           if (data.approvalUrl) {
-            window.open(data.approvalUrl, "vana-connect", "width=600,height=700");
+            openVanaApproval(data.approvalUrl);
             popupRef.current = null;
           }
         })
@@ -1222,7 +1255,7 @@ export default function PageClient({
                 <motion.button
                   whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
                   whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                  onClick={() => goView("connect")}
+                  onClick={() => openConnect()}
                   className="hidden sm:inline-flex items-center justify-center min-h-[40px] gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
                   style={{
                     background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)",
@@ -1275,7 +1308,7 @@ export default function PageClient({
                       </button>
                     ))}
                     <button
-                      onClick={() => goView("connect")}
+                      onClick={() => openConnect()}
                       className="w-full mt-2 px-3 py-3 rounded-lg text-sm font-semibold text-white"
                       style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
                     >
@@ -1343,7 +1376,7 @@ export default function PageClient({
                   <motion.button
                     whileHover={reducedMotion ? {} : { scale: 1.04, y: -2 }}
                     whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                    onClick={() => goView("connect")}
+                    onClick={() => openConnect()}
                     className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-base font-semibold text-white transition-shadow duration-300"
                     style={{
                       background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)",
@@ -1499,7 +1532,7 @@ export default function PageClient({
               <motion.button
                 whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
                 whileTap={reducedMotion ? {} : { scale: 0.98 }}
-                onClick={() => goView("connect")}
+                onClick={() => openConnect()}
                 className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium text-white transition-all"
                 style={{
                   background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)",
@@ -1943,7 +1976,7 @@ export default function PageClient({
                   <motion.button
                     whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
                     whileTap={reducedMotion ? {} : { scale: 0.98 }}
-                    onClick={() => goView("connect")}
+                    onClick={() => openConnect()}
                     className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-sm font-medium text-white transition-all"
                     style={{
                       background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)",
@@ -2115,7 +2148,7 @@ export default function PageClient({
                   <motion.button
                     whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
                     whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                    onClick={() => goView("connect")}
+                    onClick={() => openConnect()}
                     className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
                     style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)", boxShadow: "0 2px 12px -4px rgba(59,130,246,0.5)" }}
                   >
@@ -2133,7 +2166,7 @@ export default function PageClient({
                   <motion.button
                     whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
                     whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                    onClick={() => goView("connect")}
+                    onClick={() => openConnect()}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-shadow duration-300"
                     style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
                   >
@@ -2151,7 +2184,7 @@ export default function PageClient({
                   <motion.button
                     whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
                     whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                    onClick={() => goView("connect")}
+                    onClick={() => openConnect()}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-shadow duration-300"
                     style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
                   >
@@ -2578,7 +2611,7 @@ export default function PageClient({
                 <motion.button
                   whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
                   whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                  onClick={() => goView("connect")}
+                  onClick={() => openConnect()}
                   className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
                   style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
                 >
@@ -2619,7 +2652,7 @@ export default function PageClient({
                 {/* Quiet upsell — one line, no card clutter */}
                 <div className="max-w-2xl mx-auto mt-6 text-center">
                   <button
-                    onClick={() => goView("connect")}
+                    onClick={() => openConnect()}
                     className="text-[13px] text-white/40 hover:text-white/70 transition-colors"
                   >
                     Connect another source to reveal another side of you{" "}
@@ -2683,7 +2716,7 @@ export default function PageClient({
                 <motion.button
                   whileHover={reducedMotion ? {} : { scale: 1.03, y: -1 }}
                   whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                  onClick={() => goView("connect")}
+                  onClick={() => openConnect()}
                   className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
                   style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
                 >
@@ -2720,7 +2753,7 @@ export default function PageClient({
                 <motion.div
                   whileHover={reducedMotion ? {} : { scale: 1.02, y: -2 }}
                   whileTap={reducedMotion ? {} : { scale: 0.98 }}
-                  onClick={() => goView("connect")}
+                  onClick={() => openConnect()}
                   className="p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] cursor-pointer hover:border-white/15 transition-colors"
                 >
                   <div className="text-sm font-semibold text-white/80">Want a deeper picture?</div>
@@ -2797,7 +2830,7 @@ export default function PageClient({
                 <motion.button
                   whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
                   whileTap={reducedMotion ? {} : { scale: 0.98 }}
-                  onClick={() => goView("connect")}
+                  onClick={() => openConnect()}
                   className="mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
                   style={{ background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)" }}
                 >
@@ -3013,7 +3046,7 @@ export default function PageClient({
 
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <button
-                  onClick={() => goView("connect")}
+                  onClick={() => openConnect()}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-shadow duration-300"
                   style={{ background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)", boxShadow: "0 8px 30px -8px rgba(79,140,255,0.5)" }}
                 >
@@ -3107,7 +3140,7 @@ export default function PageClient({
               <motion.button
                 whileHover={reducedMotion ? {} : { scale: 1.04, y: -2 }}
                 whileTap={reducedMotion ? {} : { scale: 0.97 }}
-                onClick={() => goView("connect")}
+                onClick={() => openConnect()}
                 className="mt-9 inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl text-base font-semibold text-white transition-shadow duration-300"
                 style={{
                   background: "linear-gradient(135deg, #4F8CFF 0%, #00D4FF 100%)",
@@ -3301,6 +3334,74 @@ export default function PageClient({
                     </button>
                   </div>
                 )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── "Add a source" bottom sheet (dashboard entry points) ── */}
+        <AnimatePresence>
+          {connectSheetOpen && (
+            <motion.div
+              key="connectsheet"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[90] flex items-end justify-center"
+              onClick={() => setConnectSheetOpen(false)}
+            >
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+              <motion.div
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 60 }}
+                transition={{ duration: 0.28, ease: easeOut }}
+                className="relative w-full max-w-lg mx-auto max-h-[85dvh] overflow-y-auto rounded-t-3xl border border-white/10 border-b-0 bg-[#0F172A]/95 backdrop-blur-xl p-5 pb-8 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-display text-lg font-semibold text-white">
+                    Add a source
+                  </h3>
+                  <button
+                    onClick={() => setConnectSheetOpen(false)}
+                    className="text-white/40 hover:text-white transition-colors p-1"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <p className="text-xs text-white/45 mb-4">
+                  Connect a platform and Nodea reads your real activity — straight from
+                  this sheet, no separate tab needed.
+                </p>
+                <div className="space-y-2.5">
+                  {DATA_SOURCES.filter((s) => s.id !== "chatgpt").map((source) => (
+                    <div
+                      key={source.id}
+                      className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-3"
+                    >
+                      <BrandIconTile id={source.icon} size={34} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-white truncate">
+                            {source.name}
+                          </span>
+                          <span className="text-[10px] text-cyan-300/80 truncate">
+                            {source.dna}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-white/45 truncate">
+                          {source.outputSummary}
+                        </p>
+                      </div>
+                      {renderSourceActions(source)}
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-4 text-center text-[11px] text-white/30">
+                  You approve exactly what we read — and you can revoke anytime.
+                </p>
               </motion.div>
             </motion.div>
           )}
