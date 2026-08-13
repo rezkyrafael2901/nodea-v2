@@ -211,6 +211,9 @@ export default function PageClient({
   // ── Tab-based navigation (Patina-style bottom nav) ──
   const [view, setView] = useState<ViewKey>(initialView);
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
+  // Pre-selected source dari home card → connect view (scroll + highlight)
+  const [pendingSource, setPendingSource] = useState<string | null>(null);
+  const [highlightSource, setHighlightSource] = useState<string | null>(null);
 
   const goView = useCallback((v: ViewKey, anchor?: string) => {
     setNavOpen(false);
@@ -243,6 +246,31 @@ export default function PageClient({
       }
     }, 80);
   }, []);
+
+  // Home card → buka connect view + scroll ke source tertentu + highlight sementara
+  const goConnectSource = useCallback(
+    (sourceId: string) => {
+      setPendingSource(sourceId);
+      goView("connect");
+    },
+    [goView]
+  );
+
+  useEffect(() => {
+    if (view === "connect" && pendingSource) {
+      const id = pendingSource;
+      setPendingSource(null);
+      const t = setTimeout(() => {
+        const el = document.querySelector(`[data-source-id="${id}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          setHighlightSource(id);
+          setTimeout(() => setHighlightSource(null), 3200);
+        }
+      }, 120);
+      return () => clearTimeout(t);
+    }
+  }, [view, pendingSource]);
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -870,6 +898,7 @@ export default function PageClient({
     return (
       <motion.div
         key={source.id}
+        data-source-id={source.id}
         variants={cardVariants}
         custom={index}
         initial="initial"
@@ -877,6 +906,10 @@ export default function PageClient({
         whileHover={reducedMotion ? {} : "hover"}
         whileTap={reducedMotion ? {} : "tap"}
         className={`group relative flex h-full flex-col rounded-2xl border p-5 transition-all duration-300 ease-out ${
+          highlightSource === source.id
+            ? "ring-2 ring-cyan-400/70 border-cyan-400/40 shadow-[0_0_28px_-4px_rgba(0,212,255,0.45)]"
+            : ""
+        } ${
           isConnected
             ? "bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40"
             : disabledOnMobile
@@ -1660,6 +1693,8 @@ export default function PageClient({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
               {DATA_SOURCES.map((source) => {
+                const srcConnected = onboardedSources.has(source.id);
+                const srcDesktopOnly = source.platform === "desktop" && !isDesktop;
                 return (
                   <motion.div
                     key={source.id}
@@ -1667,7 +1702,8 @@ export default function PageClient({
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4 }}
-                    className="group relative flex h-full flex-col rounded-2xl border border-white/[0.1] p-5 transition-all duration-300 hover:border-white/[0.2]"
+                    onClick={() => goConnectSource(source.id)}
+                    className="group relative flex h-full cursor-pointer flex-col rounded-2xl border border-white/[0.1] p-5 transition-all duration-300 hover:border-white/[0.2]"
                     style={{
                       background:
                         "linear-gradient(135deg, rgba(79,140,255,0.32) 0%, rgba(0,212,255,0.32) 100%)",
@@ -1688,10 +1724,20 @@ export default function PageClient({
                     <p className="mt-2.5 text-[13px] text-white/55 leading-relaxed line-clamp-3 flex-1">
                       {source.outputSummary}
                     </p>
-                    <div className="mt-4 flex items-center justify-end gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-white/30">
-                        <Sparkles className="w-3 h-3" /> Preview
-                      </span>
+                    <div className="mt-4 flex items-center justify-between gap-2">
+                      {srcConnected ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-1.5 text-[11px] font-medium text-emerald-400">
+                          <Check className="w-3 h-3" /> Connected
+                        </span>
+                      ) : srcDesktopOnly ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-white/30">
+                          <Monitor className="w-3 h-3" /> Desktop only
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/25 bg-cyan-400/[0.06] px-3 py-1.5 text-[11px] font-medium text-cyan-300 transition-colors group-hover:bg-cyan-400/[0.12] group-hover:border-cyan-400/50">
+                          Mirror now <ArrowRight className="w-3 h-3" />
+                        </span>
+                      )}
                     </div>
                     </div>
                   </motion.div>
@@ -1700,7 +1746,7 @@ export default function PageClient({
             </div>
 
             <div className="mt-8 text-center">
-              <p className="text-xs text-white/35 mb-4">Preview only — connect your accounts to build your real card.</p>
+              <p className="text-xs text-white/35 mb-4">Tap any card to jump straight to Connect — or start from the tab above.</p>
               <motion.button
                 whileHover={reducedMotion ? {} : { scale: 1.02, y: -1 }}
                 whileTap={reducedMotion ? {} : { scale: 0.98 }}
