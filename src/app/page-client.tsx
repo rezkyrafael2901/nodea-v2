@@ -17,7 +17,6 @@ import InsightsPanel from "@/components/insights-panel";
 import IdentityResult from "@/components/identity-result";
 import { BrandIconTile, BrandIcon, type BrandId } from "@/components/brand-icons";
 import { AppLogo, AppWordmark } from "@/components/app-logo";
-import DataConstellation from "@/components/data-constellation";
 import {
   Plus,
   Check,
@@ -1163,45 +1162,23 @@ export default function PageClient({
       className="min-h-dvh bg-[var(--color-bg)] text-white relative overflow-x-hidden isolate"
       style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
     >
-      {/* ── Animated Background (Aurora drift) ── */}
-      <motion.div
+      {/* ── Static Background (Aurora glow, no animation) ── */}
+      <div
         className="pointer-events-none fixed inset-0 -z-10"
-        animate={glowVariants}
-        style={{ willChange: "transform, opacity" }}
       >
-        <div className="absolute -top-40 left-1/4 w-[800px] h-[500px] rounded-full bg-blue-600/15 blur-[150px] animate-aurora-1" />
-        <div className="absolute top-1/3 -left-60 w-[500px] h-[500px] rounded-full bg-cyan-600/10 blur-[120px] animate-aurora-2" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] rounded-full bg-cyan-600/10 blur-[150px] animate-aurora-3" />
-        <div className="absolute top-1/4 right-1/4 w-[420px] h-[420px] rounded-full bg-violet-600/10 blur-[140px] animate-aurora-4" />
+        <div className="absolute -top-40 left-1/4 w-[800px] h-[500px] rounded-full bg-blue-600/15 blur-[150px]" />
+        <div className="absolute top-1/3 -left-60 w-[500px] h-[500px] rounded-full bg-cyan-600/10 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] rounded-full bg-cyan-600/10 blur-[150px]" />
+        <div className="absolute top-1/4 right-1/4 w-[420px] h-[420px] rounded-full bg-violet-600/10 blur-[140px]" />
         <div
           className="absolute top-0 left-0 w-full h-full"
           style={{
             background: "radial-gradient(ellipse at 50% 0%, rgba(79,140,255,0.08) 0%, transparent 60%)",
           }}
         />
-      </motion.div>
-
-      {/* ── Global Background: constellation + floating particles (all views) ── */}
-      <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
-        {/* Data constellation — full-viewport, behind everything */}
-        <DataConstellation className="absolute inset-0 h-full w-full opacity-85" />
-        {[...Array(12)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full bg-blue-500/30"
-            style={{
-              left: `${5 + Math.random() * 90}%`,
-              top: `${5 + Math.random() * 90}%`,
-            }}
-            animate={{
-              y: [-20, 20, -20],
-              x: [-10, 10, -10],
-              opacity: [0.1, 0.4, 0.1],
-            }}
-            transition={{ duration: 15 + Math.random() * 10, repeat: Infinity, ease: "linear", delay: Math.random() * 5 }}
-          />
-        ))}
       </div>
+
+      {/* ── Global Background: static aurora glow (no particle animation) ── */}
 
       <div className="relative z-10">
         {/* ── Header (Framer-style nav) ── */}
